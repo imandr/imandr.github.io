@@ -1,0 +1,379 @@
+<html>
+<head>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="./collide.js"></script>
+    
+    <style type="text/css">
+        line.mark {
+            stroke: black;
+        }
+        line.hand {
+            stroke: black;
+        }
+        line.hour {
+            stroke-width: 0.018;
+        }
+        line.minute {
+            stroke-width: 0.015;
+        }
+        line.second {
+            stroke-width: 0.010;
+        }
+        circle.bubble {
+            fill-opacity: 0.5;
+            stroke: black;
+            stroke-width: 0.001;
+        }
+    </style>
+    
+</head>
+
+<body>
+    <center><svg id="clock"></svg></center>
+
+    <script>
+        var Size = 500;
+        var Center = Size/2;
+        var Scale = (Size*0.8)/2;
+        var Margin = 30;
+        var NSecond = 10;
+        var NMinute = 8;
+        var NHour = 5;
+        var NBubbles = 0;
+        var Step = 1.0/(NSecond + 1);
+        var R = Size/2 - Margin;
+        var ColorScheme = d3.scaleOrdinal(d3.schemeCategory10),
+            ColorSchemeSize = 10;
+        
+        function x(p, r)
+        {
+            return r*Math.sin(p);
+        }
+        
+        function y(p, r)
+        {
+            return r*Math.cos(p);
+        }
+
+        function secondDot(t, r, cvt)
+        {
+            var s = t % 60;
+            var p = Math.PI*2/60*s;
+            return cvt(p, r);
+        }
+
+        function hourDot(t, r, cvt)
+        {
+            var h = (t % (3600*24))/3600.0;
+            h = (t % (3600*12))/(3600.0*12.0);
+            var p = Math.PI*2 * h;
+            return cvt(p, r);
+        }
+
+        function minuteDot(t, r, cvt)
+        {
+            var m = (t % 3600)/3600.0;
+            var p = Math.PI*2 * m;
+            return cvt(p, r);
+        }
+
+        var i0 = 0;
+
+        var Marks = d3.range(12)
+            .map(function(i){
+                var phi = i * Math.PI/6;
+                return {
+                    type: "mark",
+                    index: i+i0,
+                    x: Math.sin(phi),
+                    y: Math.cos(phi),
+                    fx: Math.sin(phi),
+                    fy: Math.cos(phi),
+                    r: (i % 3) ? 0.02 : 0.03
+                }
+            });
+            
+        i0 += 12;
+
+        var Seconds = d3.range(NSecond)
+            .map(function(i){
+                var r = Step * (i+1);
+                return {
+                    type: "second",
+                    index: i+i0,
+                    R: r,
+                    x: 0,
+                    y: r,
+                    fx: 0,
+                    fy: r,
+                    r: 0.03
+                }
+            });
+            
+        i0 += NSecond;
+            
+        var Minutes = d3.range(NMinute)
+            .map(function(i){
+                var r = Step * (i+1);
+                return {
+                    type: "minute",
+                    index: i+i0,
+                    R: r,
+                    x: 0,
+                    y: r,
+                    fx: 0,
+                    fy: r,
+                    r: 0.03
+                }
+            });
+            
+        i0 += NMinute;
+            
+        var Hours = d3.range(NHour)
+            .map(function(i){
+                var r = Step * (i+1);
+                return {
+                    type: "hour",
+                    index: i+i0,
+                    R: r,
+                    x: 0,
+                    y: r,
+                    fx: 0,
+                    fy: r,
+                    r: 0.03
+                }
+            });
+        
+        i0 += NHour;
+        var bubbleIndex = i0;
+
+        function createBubble()
+        {
+            var r = Math.random();
+            r = 0.03 + 0.1*r*r;
+            return {
+                    type: "bubble",
+                    index: bubbleIndex++,
+                    x: (Math.random()*2-1)*0.75,
+                    y: 1.5,
+                    r: r
+                };
+        }
+        
+        var Bubbles = d3.range(NBubbles)
+            .map(
+                function(i){ return createBubble(i+i0); }
+            )
+            
+        var nextBubbleIndex = i0 + NBubbles;
+        
+        var svg = d3.select("#clock").attr("width", Size).attr("height", Size);
+        var translated = svg
+            .append("g").attr("transform", "translate(" + Center + " " + Center + ")," +
+                "scale(" + Scale + " " + (-Scale) + ")");
+
+        translated            
+            .append("defs")
+                .append("clipPath").attr("id", "clip_path")
+                    .append("rect")
+                        .attr("x", -1)
+                        .attr("y", -1)
+                        .attr("width", 2)
+                        .attr("height", 2);
+
+        
+        var marks = translated.selectAll(".mark")
+            .data(Marks)
+            .enter()
+            .append("line").classed("mark", true)
+                .attr("stroke-width", function(d){ return d.r; })
+                .attr("x1", function(d){ return d.x;})
+                .attr("y1", function(d){ return d.y;})
+                .attr("x2", function(d){ return d.x*(1.0 - 2*d.r);})
+                .attr("y2", function(d){ return d.y*(1.0 - 2*d.r);});
+                                        
+        var secondHand = translated
+                .append("line").classed("second", true).classed("hand", true)
+                    .attr("x1", Seconds[0].x)
+                    .attr("y1", Seconds[0].y)
+                    .attr("x2", Seconds[Seconds.length-1].x)
+                    .attr("y2", Seconds[Seconds.length-1].y);
+
+        var minuteHand = translated
+                .append("line").classed("minute", true).classed("hand", true)
+                    .attr("x1", Minutes[0].x)
+                    .attr("y1", Minutes[0].y)
+                    .attr("x2", Minutes[Minutes.length-1].x)
+                    .attr("y2", Minutes[Minutes.length-1].y);
+                
+        var hourHand = translated
+                .append("line").classed("hour", true).classed("hand", true)
+                    .attr("x1", Hours[0].x)
+                    .attr("y1", Hours[0].y)
+                    .attr("x2", Hours[Hours.length-1].x)
+                    .attr("y2", Hours[Hours.length-1].y);
+                    
+        var bubbles = translated.selectAll(".bubble")
+                .data(Bubbles, function(d){ return d.index; })
+                .enter()
+                .append("circle").classed("bubble", true)
+                    .attr("clip-path", "url(#clip_path)")
+                    .attr("fill", function(d)
+                        { 
+                            var c = ColorScheme(d.index % ColorSchemeSize);
+                            return c;
+                        })
+                    .attr("r", function(d){ return d.r; })
+                    .attr("cx", function(d){ return d.x;})
+                    .attr("cy", function(d){ return d.y;});
+                    
+        function bubbleCircles()
+        {
+            return translated.selectAll(".bubble")
+                .data(Bubbles, function(d){ return d.index; });
+        }
+                    
+        function updateHand(dots, t, dotFunction)
+        {
+            for( var i in dots )
+            {
+                var dot = dots[i];
+                dot.x = dotFunction(t, dot.R, x);
+                dot.y = dotFunction(t, dot.R, y);
+                dot.fx = dot.x;
+                dot.fy = dot.y;
+            }
+        }
+
+        var last_t = null;
+
+        function upateHands()
+        {
+            var d = new Date();
+            var t = d.getTime();
+            t = Math.round(t/1000.0) - d.getTimezoneOffset()*60;
+            
+            if( last_t != t )
+            {
+                updateHand(Seconds, t, secondDot);
+                updateHand(Minutes, t, minuteDot);
+                updateHand(Hours, t, hourDot);
+            
+                secondHand.transition().duration(250)
+                        .attr("x1", Seconds[0].x)
+                        .attr("y1", Seconds[0].y)
+                        .attr("x2", Seconds[Seconds.length-1].x)
+                        .attr("y2", Seconds[Seconds.length-1].y);
+            
+                minuteHand
+                        .attr("x1", Minutes[0].x)
+                        .attr("y1", Minutes[0].y)
+                        .attr("x2", Minutes[Minutes.length-1].x)
+                        .attr("y2", Minutes[Minutes.length-1].y);
+                        
+                hourHand
+                        .attr("x1", Hours[0].x)
+                        .attr("y1", Hours[0].y)
+                        .attr("x2", Hours[Hours.length-1].x)
+                        .attr("y2", Hours[Hours.length-1].y);
+                        
+                last_t = t;
+            }
+            
+        }
+        
+        function updateBubbles()
+        {
+            // remove fallen bubbles
+            var n = Bubbles.length;
+            for( i in Bubbles )
+            {
+                var j = n - i - 1;
+                if( Bubbles[j].y < -2 )
+                    Bubbles.splice(j,1);
+            }
+            
+            var bubble = createBubble();
+            Bubbles.push(bubble);
+            allDots.push(bubble);
+            
+            var lst =  bubbleCircles();
+
+            var enter = lst.enter();
+            var exit = lst.exit();
+                
+            enter
+                .append("circle").classed("bubble", true)
+                    .attr("clip-path", "url(#clip_path)")
+                    .attr("fill", function(d, i)
+                        { 
+                            var c = ColorScheme(d.index % ColorSchemeSize);
+                            return c;
+                        })
+                    .attr("r", function(d){ return d.r; })
+                    .attr("cx", function(d){ return d.x;})
+                    .attr("cy", function(d){ return d.y;});
+                    
+            exit.remove();
+        }
+
+        var allDots = Marks.concat(Hours).concat(Minutes).concat(Seconds).concat(Bubbles);
+
+        var simulation = d3.forceSimulation()
+            .force("gravity", function(alpha){
+                for( var i in allDots )
+                {
+                    dot = allDots[i];
+                    dot.vy -= alpha*0.1*0.04;
+                }
+            })
+            .force("collide", collideForce())
+            .on("tick", function()
+                {
+                    /*
+                    var q = d3.quadtree()
+                        .x(function(d){ return d.x; })
+                        .y(function(d){ return d.y; })
+                        .addAll(allDots);
+
+                    for( var i in allDots ) {
+                      q.visit(collide(allDots[i]));
+                    }
+                    */
+                    
+                    bubbleCircles()
+                        .attr("cx", function(d){ 
+                            return d.x; 
+                        })
+                        .attr("cy", function(d){ 
+                            return d.y; 
+                        });
+        
+                }
+            )
+            .alphaDecay(0.0)
+            .nodes(allDots);
+        
+        
+        setInterval(
+            function()
+            {
+                upateHands();
+            },
+            200
+        );
+        
+        setInterval(
+            function()
+            {
+                updateBubbles();
+                simulation.nodes(allDots);
+            },
+            400
+        );
+        
+    </script>
+
+
+</body>
+</html>
