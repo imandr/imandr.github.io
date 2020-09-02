@@ -93,7 +93,7 @@ function DeJong(a, b, c, d)
     this.f = this.dragged_fcn;
     
     this.Momentum = 0.99;
-    this.Rate = 0.02;
+    this.Rate = 0.1;
     this.PMin = -2.5;
     this.PMax = 2.5;    
     this.LastMutation = [0.0, 0.0, 0.0, 0.0];
