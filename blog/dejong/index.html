@@ -1,0 +1,96 @@
+<html>
+
+<head>
+    <script src="canvas.min.js"></script>
+    <script src="dejong.min.js"></script>
+    <script src="tools.min.js"></script>
+    
+</head>
+
+<body>
+    
+    <canvas id="canvas" style="border:1px solid #d3d3d3;"></canvas>
+    
+    <script>
+        
+        function color_changer()
+        {
+            this.H = 0.2;
+            this.DH = 0.0;
+            this.Momentum = 0.9;
+            this.S = this.SMin = 0.3;
+            this.SMax = 0.99;
+            this.DS = 0.0;
+            this.V = 0.99;
+            
+            this.next_color = function()
+            {
+                var d = Math.random()*0.01-0.002;
+                d = this.DH * this.Momentum + d * (1.0 - this.Momentum);
+                if( d < -0.1 )  d = -0.1;
+                if( d > 0.1 ) d = 0.1;
+                var h = this.H + d;
+                this.DH = d;
+                while( h >= 1.0 )
+                    h -= 1.0;
+                while( h < 0.0 )
+                    h += 1.0;
+                this.H = h;
+                
+                d = Math.random()*0.1-0.05;
+                d = this.DS * this.Momentum + d * (1.0 - this.Momentum);
+                if( d < -0.2 )  d = -0.2;
+                if( d > 0.2 ) d = 0.2;
+                var s = this.S + d;
+                if( s > this.SMax ) s = this.SMax;
+                if( s < this.SMin ) s = this.SMin;
+                this.DS = s - this.S;
+                this.S = s;                
+                
+                return hsb_to_rgb([h, s, this.V]);
+            }
+        }
+        
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        var C = new canvas("canvas", w, h, -2.5, -2.5, 2.5, 2.5);
+
+        function window_resized(event)
+        {
+            C.resize(document.body.clientWidth, document.body.clientHeight);
+        }
+        
+        window.onresize = window_resized;
+
+
+        C.clear([0,0,0], 1.0);
+        var D = new DeJong(-2.24, 0.43, -0.65, -2.43);
+        const NP = 30000;
+        const Skip = 50;
+        var points = [];
+        var Colors = new color_changer();
+
+        for( var i = 0; i < NP; i++ )
+        {
+            points.push([Math.random(), Math.random()]);
+        }
+        
+        for( var t = 0; t < Skip; t++ )
+            points = D.f(points);
+        
+        function step()
+        {
+            var c = Colors.next_color();
+            D.mutate(); 
+            points = D.f(points);
+            points = D.f(points);
+            points = D.f(points);
+            C.clear([0,0,0], 0.2);
+            C.points(points, c, 0.07);           
+        }
+
+        setInterval(step, 1000.0/20);
+        
+    </script>
+</body>
+</html>
