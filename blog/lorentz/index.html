@@ -2,7 +2,7 @@
 
 <head>
     <script src="canvas.js"></script>
-    <script src="dejong.js"></script>
+    <script src="lorentz.js"></script>
     <script src="tools.js"></script>
     
 </head>
@@ -53,7 +53,13 @@
         
         const w = window.innerWidth;
         const h = window.innerHeight;
-        var C = new canvas("canvas", w, h, -2.5, -2.5, 2.5, 2.5);
+
+        var Morph = new Lorentz();
+		const bounds = Morph.bounds;
+		const b1 = bounds[0];
+		const b2 = bounds[1];
+		
+        var C = new canvas("canvas", w, h, b1[0], b1[1], b2[0], b2[1]);
 
         function window_resized(event)
         {
@@ -62,31 +68,24 @@
         
         window.onresize = window_resized;
 
-
         C.clear([0,0,0], 1.0);
-        var D = new DeJong(-2.24, 0.43, -0.65, -2.43);
-        const NP = 30000;
+        const NP = Morph.NPoints;
         const Skip = 50;
-        var points = [];
         var Colors = new color_changer();
 
-        for( var i = 0; i < NP; i++ )
-        {
-            points.push([Math.random(), Math.random()]);
-        }
-        
-        for( var t = 0; t < Skip; t++ )
-            points = D.f(points);
-        
         function step()
         {
+			var points = Morph.init();
             var c = Colors.next_color();
-            D.mutate(); 
-            points = D.f(points);
+			
+            Morph.mutate(); 
+						
+            points = Morph.transform(points);
+			const projected = Morph.project(points);
             //points = D.f(points);
             //points = D.f(points);
-            C.clear([0,0,0], 0.2);
-            C.points(points, c, 0.07);           
+            C.clear([0,0,0], 0.8);
+            C.points(projected, c, 0.07);           
         }
 
         setInterval(step, 1000.0/20);

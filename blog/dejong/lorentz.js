@@ -76,8 +76,8 @@ function DeJong(a, b, c, d)
             {
                 const x0 = points[i][0];
                 const y0 = points[i][1];
-                const x1 = points1[i][0];
-                const y1 = points1[i][1];
+                const x1 = points[i][0];
+                const y1 = points[i][1];
                 const step = Math.random() * this.Drag;
                 p1 = [
                     x1 + step*(x0-x1),
