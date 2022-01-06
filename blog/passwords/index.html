@@ -24,12 +24,27 @@
         
         #password {
             font-family: monospace;
-            font-size: 16px;
+            font-size: 14px;
+            border: 1px solid gray;
+            border-radius: 2px;
+            padding: 0px 10px;
+            min-width: 500px;
+            white-space: pre;
         }
         
         sup {
             font-size: 10px;
         }
+        
+        .comment {
+            color: gray;
+            font-size: 12;
+        }
+        
+        .comment sup {
+            font-size: 8px;            
+        }
+        
     </style>
     
 </head>
@@ -58,10 +73,11 @@
             var password = "";
             for( var i=0; i < array.length; i++ )
                 password += chars[array[i] % chars.length];
-            document.getElementById("copy_button").disabled = false;
             return password
         }
 
+        var generated_password = "";
+        
         function read_options()
         {
             var options = {};
@@ -74,10 +90,24 @@
             return options;
         }
 
+        function display_password()
+        {
+            if( document.getElementById("hide").checked )
+            {
+                var hidden = "";
+                for( var i=0; i<generated_password.length; i++ )
+                    hidden += "&bull;";
+                document.getElementById("password").innerHTML = hidden;
+            }
+            else
+                document.getElementById("password").innerHTML = generated_password;
+            document.getElementById("copy_button").disabled = (generated_password.length == 0);
+        }
+
         function run()
         {
-            var password = generate(read_options());
-            document.getElementById("password").value = password;
+            generated_password = generate(read_options());
+            display_password();
         }
 
         function recalculate()
@@ -92,6 +122,7 @@
             else
                 document.getElementById("combinations").innerHTML = "0";
         }
+        
         var clear_timer = null;
         
         function clear_copied()
@@ -102,19 +133,21 @@
 
         function copy_password()
         {
-            var password_input = document.getElementById("password");
-            password_input.select();
-            password_input.setSelectionRange(0, 99999); /* For mobile devices */
-
             /* Copy the text inside the text field */
-            navigator.clipboard.writeText(password_input.value);
+            navigator.clipboard.writeText(generated_password);
             document.getElementById("copied_text").innerHTML = '<span style="color:gray"><i>copied to clipboard</i></span>';
             if( clear_timer != null )
                 window.clearTimeout(clear_timer);
             clear_timer = setTimeout(clear_copied, 2000);
         }
-        
 
+        function clear_password()
+        {
+            generated_password = "";
+            display_password();
+        }
+
+        
     </script>
         
     <h1>Random Password Generator</h1>
@@ -155,25 +188,36 @@
         <tr>
             <th>Combinations:</th>
             <td id="combinations"></td>
-            <td colspan=3 style="color:gray;"><i>age of the Universe: 3*10<sup>23</sup> microseconds</i></td>
-            <td><button onclick="run()">generate password</button></td>
+            <td colspan=3 class="comment"><i>age of the Universe: 3*10<sup>23</sup> microseconds</i></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td width=0px><input type="checkbox" id="hide" onchange="display_password()"/></td><td>hide</td>
         </tr>
         <tr>
             <th>Password:</th>
-            <td colspan=4><input type=text disabled="disabled" id="password" size=50/></td>
-            <td><button onclick="copy_password()" id="copy_button" disabled="disabled">copy password</button></td>
-            <td id="copied_text"></td>
+            <td colspan=5 id="password"></td>
         </tr>
+        <tr>
+            <td></td>
+            <td colspan=4>
+                <button onclick="run()">generate</button>
+                <button onclick="clear_password()">clear</button>
+                <button onclick="copy_password()" id="copy_button" disabled="disabled">copy</button>
+                &nbsp;&nbsp;<span id="copied_text" class="comment"></span>
+            </td>
     </table>    
     
-    <p style="color:gray; position: fixed; bottom:5px">
+    <!--
+        <p style="color:gray; position: fixed; bottom:5px">
         Random password generator is only as good as the random number generator it uses to pick random characrets for the password. 
         Many popular random password generators available
         on the internet use basic pseudo-random number generator, which is known not to be good for cryptographic purposes. 
         Unlike many others, this password generator uses cryptographically strong random number generator and therefore 
         produces reliably random, hard to guess passwords.
-    </p>
-    
+        </p>
+    -->
+        
     <script>
         recalculate();
     </script>
