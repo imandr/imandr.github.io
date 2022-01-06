@@ -58,7 +58,7 @@
             var password = "";
             for( var i=0; i < array.length; i++ )
                 password += chars[array[i] % chars.length];
-            
+            document.getElementById("copy_button").disabled = false;
             return password
         }
 
@@ -106,9 +106,9 @@
             password_input.select();
             password_input.setSelectionRange(0, 99999); /* For mobile devices */
 
-             /* Copy the text inside the text field */
+            /* Copy the text inside the text field */
             navigator.clipboard.writeText(password_input.value);
-            document.getElementById("copied_text").innerHTML = "copied to clipboard";
+            document.getElementById("copied_text").innerHTML = '<span style="color:gray"><i>copied to clipboard</i></span>';
             if( clear_timer != null )
                 window.clearTimeout(clear_timer);
             clear_timer = setTimeout(clear_copied, 2000);
@@ -155,13 +155,13 @@
         <tr>
             <th>Combinations:</th>
             <td id="combinations"></td>
-            <td colspan=3 style="color:gray; font-size: 12px">age of the Universe: 3*10<sup>23</sup> microseconds</td>
+            <td colspan=3 style="color:gray;"><i>age of the Universe: 3*10<sup>23</sup> microseconds</i></td>
             <td><button onclick="run()">generate password</button></td>
         </tr>
         <tr>
             <th>Password:</th>
             <td colspan=4><input type=text disabled="disabled" id="password" size=50/></td>
-            <td><button onclick="copy_password()">copy password</button></td>
+            <td><button onclick="copy_password()" id="copy_button" disabled="disabled">copy password</button></td>
             <td id="copied_text"></td>
         </tr>
     </table>    
