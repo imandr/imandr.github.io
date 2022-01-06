@@ -10,7 +10,7 @@
         
         body, th, td {
             font-family: arial;
-            font-size: 12px;
+            font-size: 16px;
         }
         
         .form th {
@@ -24,8 +24,11 @@
         
         #password {
             font-family: monospace;
-            font-size: 12px;
-            b-order: 1px solid gray;
+            font-size: 16px;
+        }
+        
+        sup {
+            font-size: 10px;
         }
     </style>
     
@@ -34,36 +37,61 @@
 <body>
     <script>
         
-        function generate(length, upper, lower, digits, symbols)
+        function charset(options)
         {
-            var charset = "";
+            var chars = "";
 
-            if( upper ) charset += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            if( lower ) charset += "abcdefghijklmnopqrstuvwxyz";
-            if( digits ) charset += "0123456789";
-            if( symbols ) charset += "!$%'()+,-./:;=?@^_|~\\";
+            if( options.upper ) chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            if( options.lower ) chars += "abcdefghijklmnopqrstuvwxyz";
+            if( options.digits ) chars += "0123456789";
+            if( options.symbols ) chars += "!$%'()+,-./:;=?@^_|~\\";
+            return chars;
+        }
+        
+        function generate(options)
+        {
+            var chars = charset(options);
+            var length = options.length;
 
             var array = new Uint32Array(length);
             window.crypto.getRandomValues(array);
             var password = "";
             for( var i=0; i < array.length; i++ )
-                password += charset[array[i] % charset.length];
+                password += chars[array[i] % chars.length];
             
             return password
         }
 
+        function read_options()
+        {
+            var options = {};
+            var len_select = document.getElementById("length")
+            options.length = parseInt(len_select.options[len_select.selectedIndex].value);
+            options.upper = document.getElementById("upper").checked;
+            options.lower = document.getElementById("lower").checked;
+            options.digits = document.getElementById("digits").checked;
+            options.symbols = document.getElementById("symbols").checked;
+            return options;
+        }
+
         function run()
         {
-            var len_select = document.getElementById("length")
-            var length = parseInt(len_select.options[len_select.selectedIndex].value);
-            var upper = document.getElementById("upper").checked;
-            var lower = document.getElementById("lower").checked;
-            var digits = document.getElementById("digits").checked;
-            var symbols = document.getElementById("symbols").checked;
-            var password = generate(length, upper, lower, digits, symbols);
+            var password = generate(read_options());
             document.getElementById("password").value = password;
         }
-        
+
+        function recalculate()
+        {
+            var options = read_options();
+            var chars = charset(options);
+            if( chars.length > 0 )
+            {
+                var log10n = options.length*Math.log(chars.length)/Math.log(10);
+                document.getElementById("combinations").innerHTML = "10<sup>" + Math.floor(log10n) + "</sup>";
+            }
+            else
+                document.getElementById("combinations").innerHTML = "0";
+        }
         var clear_timer = null;
         
         function clear_copied()
@@ -89,12 +117,14 @@
 
     </script>
         
-    <h1>Random password generator</h1>
+    <h1>Random Password Generator</h1>
         
     <table class="form">
         <tr>
             <th>Length:</th>
-            <td colspan=4><select id="length">
+            <td colspan=4>
+                <select id="length" onchange="recalculate()">
+                    <option value="" disabled="disabled">-- weak --</option>
                     <option value="8">8</option>
                     <option value="10">10</option>
                     <option value="12">12</option>
@@ -106,21 +136,27 @@
                     <option value="24">24</option>
                     <option value="32">32</option>
                     <option value="40">40</option>
+                    <option value="50">50</option>
                 </select>
+            </td>
         </tr>
         <tr>
             <th>Include:</th>
-            <td width=0px><input type="checkbox" checked="checked" id="upper" width="0px"/></td><td>upper case letters</td>
-            <td width=0px><input type="checkbox" checked="checked" id="lower"/></td><td>lower case letters</td>
+            <td width=0px><input type="checkbox" checked="checked" id="upper" width="0px" onchange="recalculate()"/></td>
+            <td>upper case letters</td>
+            <td width=0px><input type="checkbox" checked="checked" id="lower" onchange="recalculate()"/></td>
+            <td>lower case letters</td>
         </tr>
         <tr>
             <td></td>
-            <td width=0px><input type="checkbox" checked="checked" id="digits"/></td><td>digits</td>
-            <td width=0px><input type="checkbox" checked="checked" id="symbols"/></td><td>symbols</td>
+            <td width=0px><input type="checkbox" checked="checked" id="digits" onchange="recalculate()"/></td><td>digits</td>
+            <td width=0px><input type="checkbox" checked="checked" id="symbols" onchange="recalculate()"/></td><td>symbols</td>
         </tr>
         <tr>
-            <td></td>
-            <td colspan=4><button onclick="run()">generate password</button></td>
+            <th>Combinations:</th>
+            <td id="combinations"></td>
+            <td colspan=3 style="color:gray; font-size: 12px">age of the Universe: 3*10<sup>23</sup> microseconds</td>
+            <td><button onclick="run()">generate password</button></td>
         </tr>
         <tr>
             <th>Password:</th>
@@ -137,6 +173,10 @@
         Unlike many others, this password generator uses cryptographically strong random number generator and therefore 
         produces reliably random, hard to guess passwords.
     </p>
+    
+    <script>
+        recalculate();
+    </script>
 </body>
 
 </html>
