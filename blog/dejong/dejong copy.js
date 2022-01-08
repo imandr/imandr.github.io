@@ -10,6 +10,7 @@ function DeJong(a, b, c, d)
     this.C = c;
     this.D = d;
     
+    
     this.fcn = function(points)
     {
         var out = [];
@@ -96,17 +97,20 @@ function DeJong(a, b, c, d)
     this.PMin = -2.5;
     this.PMax = 2.5;    
     this.LastMutation = [0.0, 0.0, 0.0, 0.0];
-    
-    this.Morpher = new Morpher(
-        [this.PMin, this.PMin, this.PMin, this.PMin], 
-        [this.PMax, this.PMax, this.PMax, this.PMax],
-        0.9, 0.0001, 
-        [this.A, this.B, this.C, this.D]
-    );
 
     this.mutate = function()
     {
-        var params = this.Morpher.step();
+        var params = [this.A, this.B, this.C, this.D];
+        for( var i=0; i<4; i++ )
+        {
+            var d = Math.random() * this.Rate - this.Rate/2;
+            d = this.Momentum * this.LastMutation[i] + (1.0 - this.Momentum) * d;
+            var p1 = params[i] + d;
+            if( p1 > this.PMax ) p1 = this.PMax;
+            if( p1 < this.PMin ) p1 = this.PMin;
+            this.LastMutation[i] = (p1 - params[i])*0.999;
+            params[i] = p1;            
+        }
         this.A = params[0];
         this.B = params[1];
         this.C = params[2];
