@@ -1,15 +1,22 @@
 
-function collideForce(radius, margin)
+function collideForce(options)
 {
+    var radius = null;
+    var margin = null;
+    if ( typeof options !== 'undefined' )
+    {
+        radius = options["radius"];
+        margin = options["margin"];
+    }
     var get_radius;
-    if ( typeof radius === 'undefined' )
+    if ( typeof radius === 'undefined' || radius == null )
         get_radius = function(x) { return x.r; }
     else if( typeof radius === 'function' )
         get_radius = radius;
     else
         get_radius = function(x) { return radius; }
     
-    if( typeof margin === 'undefined')
+    if( typeof margin === 'undefined' || margin == "null" )
         margin = 0.02;
     
     var iterations = 2;
