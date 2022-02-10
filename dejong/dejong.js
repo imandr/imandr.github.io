@@ -93,14 +93,14 @@ function DeJong(a, b, c, d)
     
     this.Momentum = 0.99;
     this.Rate = 0.1;
-    this.PMin = -2.5;
-    this.PMax = 2.5;    
+    this.PMin = -2.0;
+    this.PMax = 2.0;    
     this.LastMutation = [0.0, 0.0, 0.0, 0.0];
     
     this.Morpher = new Morpher(
         [this.PMin, this.PMin, this.PMin, this.PMin], 
         [this.PMax, this.PMax, this.PMax, this.PMax],
-        0.9, 0.0001, 
+        0.9, 0.1, 
         [this.A, this.B, this.C, this.D]
     );
 
