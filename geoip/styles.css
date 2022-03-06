@@ -1,0 +1,120 @@
+/* standalone */
+
+
+body {
+    padding: 50px;
+}
+
+body, th, td, input, select, option {
+    font-family: arial;
+    font-size: 14px;
+}
+
+div.margin {
+    margin: 12px 8px;
+}
+
+.form th {
+    text-align: right;
+    color: #888;
+}
+
+th, td {
+    padding: 3px 5px;
+}
+
+#password {
+    overflow-wrap:anywhere;
+}
+
+#password_frame {
+    background-color: #EEE;
+    border-radius: 2px;
+    padding: 3px 10px;
+    width: 380px;
+    align-items: center;
+    display: flex;
+}
+
+#password, #symbol_set {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+    font-size: 12px;        
+}
+
+sup {
+    font-size: 10px;
+}
+
+.comment {
+    color: gray;
+    font-size: 14px;
+}
+
+.comment sup {
+    font-size: 8px;            
+}
+
+div.vertical_center {
+    display: flex;
+    align-items: center;
+}
+
+button {
+    margin-right: 10px;
+}
+
+/* extension */
+
+    body.extension {
+        padding: 5px;
+    }
+
+    .extension #password_frame {
+        padding: 5px;
+        width: 250px;
+        justify-content: center;
+    }
+
+    .extension body, .extension th, .extension td, .extension input, .extension select, .extension option, .extension span {
+        font-size: 12px;
+    }
+
+    .extension  h1 {
+        font-size: 18px;
+    }
+
+    .extension td, .extension th {
+        padding: 2px;
+    }
+
+    .extension #password_frame {
+        width: 300px;
+        text-align: center;
+        height: 50px;
+        padding: 1px 5px
+    }
+    
+    .extension #password, .extension #symbol_set {
+        font-size: 12px;        
+    }
+    
+    .extension sup {
+        font-size: 10px;
+    }
+    
+    .extension .comment {
+        font-size: 10;
+    }
+    
+    .extension .comment sup {
+        font-size: 8px;            
+    }
+    
+    .extension button {
+        margin: 3px 3px;
+    }
+    
+    .extension .hide_in_extension {
+        display: none;
+        visibility: hidden;
+    }
