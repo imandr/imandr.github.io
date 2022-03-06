@@ -13,7 +13,7 @@
         <tr><th>State:</th><td id="state">...</td></tr>
         <tr><th>City:</th><td id="city">...</td></tr>
         <tr><th>Postal:</th><td id="postal">...</td></tr>
-        <tr><th>Coordinates:</th><td id="coordinates">...</td></tr>
+        <tr><th>Coordinates (lat, lon):</th><td id="coordinates">...</td></tr>
     </table>
     <script type="text/javascript">
         get_ip(
@@ -23,13 +23,14 @@
                 get_location(ip, 
                         function(location_data)
                         {
+                            var country_code = location_data["country_code"];
                             document.getElementById("country").innerHTML = location_data["country_name"]
-                                + " (" + location_data["country_code"] + ")";
+                                + " (" + location_data["country_code"] + ")"
+                                + '&nbsp;<img src="https://flagcdn.com/' + country_code.toLowerCase() + '.svg" width=20/>';
                             document.getElementById("state").innerHTML = location_data["state"];
                             document.getElementById("city").innerHTML = location_data["city"];
                             document.getElementById("postal").innerHTML = location_data["postal"];
-                            document.getElementById("coordinates").innerHTML = "longitude:" + location_data["longitude"] 
-                                + " latitude:" + location_data["latitude"];
+                            document.getElementById("coordinates").innerHTML = "" + location_data["latitude"] + " " + location_data["longitude"];
                         }
                 );
             }
