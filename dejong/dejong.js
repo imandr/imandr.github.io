@@ -92,14 +92,15 @@ function DeJong(a, b, c, d)
     this.f = this.dragged_fcn;
     
     this.Momentum = 0.99;
-    this.Rate = 0.1;
-    this.PMin = -2.0;
-    this.PMax = 2.0;    
+    this.Rate = 0.03;
+    this.PMin = 2.0;
+    this.PMax = 3.0;
+    this.Range = 1.0;
     this.LastMutation = [0.0, 0.0, 0.0, 0.0];
     
     this.Morpher = new Morpher(
-        [this.PMin, this.PMin, this.PMin, this.PMin], 
-        [this.PMax, this.PMax, this.PMax, this.PMax],
+        [this.A-this.Range, this.B-this.Range, this.C-this.Range, this.D-this.Range], 
+        [this.A+this.Range, this.B+this.Range, this.C+this.Range, this.D+this.Range], 
         0.9, 0.1, 
         [this.A, this.B, this.C, this.D]
     );
