@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <script src="limits.js"></script>
     <script src="canvas.js"></script>
     <script src="dejong.js"></script>
     <script src="tools.js"></script>
@@ -64,7 +65,8 @@
 
 
         C.clear([0,0,0], 1.0);
-        var D = new DeJong(-2.24, 0.43, -0.65, -2.43);
+        var D = new DeJong();
+        //var D = new DeJong(0,0,0,0);
         const NP = 30000;
         const Skip = 50;
         var points = [];

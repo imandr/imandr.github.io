@@ -1,15 +1,17 @@
 function DeJong(a, b, c, d)
 {
-    if ( a == null ) a = 2.01;
-    if ( b == null ) b = -2.53;
-    if ( c == null ) c = 1.61;
-    if ( d == null ) d = 0.33;
+    this.PMin = 0.5;
+    this.PMax = 2.3;    
+
+    if ( a == null ) a = this.PMin + Math.random()*(this.PMax-this.PMin);
+    if ( b == null ) b = this.PMin + Math.random()*(this.PMax-this.PMin);
+    if ( c == null ) c = this.PMin + Math.random()*(this.PMax-this.PMin);
+    if ( d == null ) d = this.PMin + Math.random()*(this.PMax-this.PMin);
     
     this.A = a;
     this.B = b
     this.C = c;
     this.D = d;
-    
     
     this.fcn = function(points)
     {
@@ -93,24 +95,14 @@ function DeJong(a, b, c, d)
     this.f = this.dragged_fcn;
     
     this.Momentum = 0.99;
-    this.Rate = 0.1;
-    this.PMin = -2.5;
-    this.PMax = 2.5;    
+    this.Rate = 0.02;
     this.LastMutation = [0.0, 0.0, 0.0, 0.0];
-
+    this.Mutator = new Mutator([[this.PMin, this.PMax], [this.PMin, this.PMax], [this.PMin, this.PMax], [this.PMin, this.PMax]],
+        [this.A, this.B, this.C, this.D]
+    );
     this.mutate = function()
     {
-        var params = [this.A, this.B, this.C, this.D];
-        for( var i=0; i<4; i++ )
-        {
-            var d = Math.random() * this.Rate - this.Rate/2;
-            d = this.Momentum * this.LastMutation[i] + (1.0 - this.Momentum) * d;
-            var p1 = params[i] + d;
-            if( p1 > this.PMax ) p1 = this.PMax;
-            if( p1 < this.PMin ) p1 = this.PMin;
-            this.LastMutation[i] = (p1 - params[i])*0.999;
-            params[i] = p1;            
-        }
+        var params = this.Mutator.step(this.Rate);
         this.A = params[0];
         this.B = params[1];
         this.C = params[2];

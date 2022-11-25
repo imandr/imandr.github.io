@@ -1,26 +1,21 @@
 function rect_mapper(x0, y0, x1, y1, w, h, mode)
 {
-    // mode = fit for now
-    // possible modes: stretch, fill, fit
-    
-    // fit mode: both x and y are mapped with the same scale, making sure both x and y domains fit into the target rectangle
-    
-    this.H = h;
-    this.W = w;
+	console.log("rect_mapper: "+[x0, y0, x1, y1, w, h]);
+	// mode is ignored for now
     this.CH = h/2;
     this.CW = w/2;
     
     this.X0 = x0;
-    this.X1 = x1;
+    this.Y0 = y0;
     this.DX = x1-x0;
     this.DY = y1-y0;
-    this.CX = (x0+x1)/2;
-    this.CY = (y0+y1)/2;
-    
-    var scalex = this.W/this.DX;
-    var scaley = this.H/this.DY;
-    
-    this.ScaleX = this.ScaleY = scalex > scaley ? scaley : scalex;
+    this.CX = x0 + this.DX/2;
+	this.CY = y0 + this.DY/2;
+	
+    this.ScaleX = w/this.DX;
+    this.ScaleY = h/this.DY;
+	
+	console.log("rect_mapper: "+[this.CH, this.CW, this.DX, this.DY]);
     
     this.map_xy = function(x, y)
     {
@@ -48,6 +43,7 @@ function rect_mapper(x0, y0, x1, y1, w, h, mode)
 
 function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
 {
+	console.log("canvas: "+dimx+" "+dimy);
     this.C = document.getElementById(element_id);
     this.C.setAttribute("width", dimx);
     this.C.setAttribute("height", dimy);
@@ -100,7 +96,7 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
             const y = p[1];
             sx += x;
             sy += y;
-            const mapped = this.Mapper.map_xy(x-this.CX, y-this.CY);
+            const mapped = this.Mapper.map_xy(x, y);
             const ix = Math.floor(mapped[0]);
             const iy = Math.floor(mapped[1]);
             this.Ctx.fillRect(ix, iy, 2, 2);
@@ -109,8 +105,8 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
         var cy = sy/points.length;
 
         // pull center
-        this.CX += this.CenterPull*(cx - this.CX);
-        this.CY += this.CenterPull*(cy - this.CY);
+        //this.CX += this.CenterPull*(cx - this.CX);
+        //this.CY += this.CenterPull*(cy - this.CY);
     }
     
     this.clear = function(color, alpha)

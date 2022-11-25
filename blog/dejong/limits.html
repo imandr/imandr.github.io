@@ -1,0 +1,49 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="./canvas.js"></script>
+    <script type="text/javascript" src="./limits.js"></script>
+</head>
+
+<body>
+    
+    <canvas id="field"></canvas>
+    <div id="vx"></div>
+    <div id="vy"></div>
+    
+    <script type="text/javascript">
+        var w = new walker(
+            [
+                [0.0, 1.0],
+                [0.0, 1.0]
+            ]
+        );
+        
+        var c = new canvas("field", 600, 600, 0.0, 0.0, 1.0, 1.0);
+        
+        var mapper = c.Mapper;
+        var p = [0.01, 0.01];
+        console.log(""+p+" -> " + mapper.map_point(p));
+        
+        function frame()
+        {
+            var point = w.step(0.1);
+            var lead = w.Lead;
+            c.clear([0.0, 0.0, 0.0], 0.03);
+            c.points([point], [1.0, 1.0, 0.0], 1.0);
+            c.points([lead], [1.0, 0.0, 1.0], 1.0);
+            c.points([
+                [0.01, 0.01],
+                [0.01, 0.99],
+                [0.99, 0.99],
+                [0.99, 0.01]
+            ], [1.0, 0.0, 0.0], 1.0);
+            
+            document.getElementById("vx").innerHTML=""+w.V[0];
+            document.getElementById("vy").innerHTML=""+w.V[1];
+        }
+        
+        setInterval(frame, 1000.0/20);
+    </script>
+</body>
+</html>
