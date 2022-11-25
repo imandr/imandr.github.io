@@ -248,7 +248,6 @@
 
         var allDots = Marks.concat(Hours).concat(Minutes).concat(Seconds).concat(Bubbles);
 
-
         var simulation = d3.forceSimulation()
             .force("attraction", d3.forceManyBody().strength(0.0003))
             .force("gravity", function(alpha){

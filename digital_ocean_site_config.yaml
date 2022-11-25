@@ -1,0 +1,16 @@
+# Config file for Digital Ocean static site deployment
+# CAUTION: do not name this file "config.yaml" because then hugo build tool will use it
+domains:
+- domain: igorvm.io
+  type: PRIMARY
+  zone: igorvm.io
+name: static-site
+region: nyc
+static_sites:
+- environment_slug: html
+  git:
+    branch: master
+    repo_clone_url: https://github.com/imandr/imandr.github.io.git
+  name: static-site
+  routes:
+  - path: /

@@ -1,0 +1,48 @@
+<html>
+
+<head>
+    <script src="canvas.js"></script>
+    <script src="morpher.js"></script>
+    
+    <style type="text/css">
+        #canvas {
+            margin: 10px;
+        }
+    </style>
+    
+</head>
+
+<body>
+    
+    <p id="coordinates"></p>
+    
+    <canvas id="canvas" style="border:1px solid #d3d3d3;"></canvas>
+    
+    <script>
+        var M = new Morpher([-1,-1], [1,1], 0.9, 0.1, [0.0, 0.0]);
+        const margin = 10;
+        
+        var C = new canvas("canvas", 0, 0, -1.0, -1.0, 1.0, 1.0);
+
+        function window_resized(event)
+        {
+            C.resize(document.body.clientWidth-2*margin, document.body.clientHeight-2*margin);
+        }
+        window_resized();
+        window.onresize = window_resized;
+
+        C.clear([0,0,0], 1.0);
+        
+        function step()
+        {
+            var p = M.step();
+            document.getElementById("coordinates").innerText = "" + p[0] + "," + p[1];
+            C.clear([0,0,0], 0.2);
+            C.points([p], [1,1,1], 0.5);
+        }
+
+        setInterval(step, 1000.0/20);
+    </script>
+</body>
+</html>
+        

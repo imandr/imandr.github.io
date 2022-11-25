@@ -12,6 +12,8 @@ function rect_mapper(x0, y0, x1, y1, w, h, mode)
     
     this.X0 = x0;
     this.X1 = x1;
+    this.Y0 = y0;
+    this.Y1 = y1;
     this.DX = x1-x0;
     this.DY = y1-y0;
     this.CX = (x0+x1)/2;
@@ -24,10 +26,14 @@ function rect_mapper(x0, y0, x1, y1, w, h, mode)
     
     this.map_xy = function(x, y)
     {
-        return [
+        var q = 0;
+        if( y > this.Y1 || y < this.Y0 )
+            q = 1; 
+        const out = [
             this.CW + (x-this.CX)*this.ScaleX,
-            this.CH + (y-this.CY)*this.ScaleY
+            this.CH - (y-this.CY)*this.ScaleY
         ];
+        return out;
     }
 
     this.map_point = function(p)
@@ -65,10 +71,10 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
     var c2 = this.Mapper.map_xy(x1, y1);
     var c3 = this.Mapper.map_xy(0,0);
 
-    this.CX = (x0 + y1)/2;
-    this.CY = (y0 + x1)/2;
+    this.CX = (x0 + x1)/2;
+    this.CY = (y0 + y1)/2;
 
-    this.CenterPull = 0.001; 
+    this.CenterPull = 0.00; 
        
     this.Ctx = this.C.getContext("2d");
     

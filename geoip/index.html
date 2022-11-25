@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <script src="get_ip.js"></script>
+</head>
+
+<body id="body">
+    <table class="form">
+        <tr><th>IP address:</th><td id="ip">...</td></tr>
+        <tr><th>Country:</th><td id="country">...</td></tr>
+        <tr><th>State:</th><td id="state">...</td></tr>
+        <tr><th>City:</th><td id="city">...</td></tr>
+        <tr><th>Postal:</th><td id="postal">...</td></tr>
+        <tr><th>Coordinates (lat, lon):</th><td id="coordinates">...</td></tr>
+    </table>
+    <script type="text/javascript">
+        get_ip(
+            function(ip)
+            {
+                document.getElementById("ip").innerHTML = ip;
+                get_location(ip, 
+                        function(location_data)
+                        {
+                            var country_code = location_data["country_code"];
+                            document.getElementById("country").innerHTML = location_data["country_name"]
+                                + " (" + location_data["country_code"] + ")"
+                                + '&nbsp;<img src="https://flagcdn.com/' + country_code.toLowerCase() + '.svg" width=20/>';
+                            document.getElementById("state").innerHTML = location_data["state"];
+                            document.getElementById("city").innerHTML = location_data["city"];
+                            document.getElementById("postal").innerHTML = location_data["postal"];
+                            document.getElementById("coordinates").innerHTML = "" + location_data["latitude"] + " " + location_data["longitude"];
+                        }
+                );
+            }
+        );
+    </script>
+</body>
+
+</html>

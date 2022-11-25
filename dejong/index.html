@@ -3,8 +3,15 @@
 <head>
     <script src="limits.js"></script>
     <script src="canvas.js"></script>
+    <script src="morpher.js"></script>
     <script src="dejong.js"></script>
     <script src="tools.js"></script>
+    
+    <style type="text/css">
+        #canvas {
+            margin: 0px;
+        }
+    </style>
     
 </head>
 
@@ -51,23 +58,28 @@
                 return hsb_to_rgb([h, s, this.V]);
             }
         }
-        
+        const margin = 10;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        var C = new canvas("canvas", w, h, -2.5, -2.5, 2.5, 2.5);
+        var C = new canvas("canvas", w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5);
 
         function window_resized(event)
         {
-            C.resize(document.body.clientWidth, document.body.clientHeight);
+            C.resize(document.body.clientWidth-margin*2, document.body.clientHeight-margin*2);
         }
-        
+        window_resized();
         window.onresize = window_resized;
 
 
         C.clear([0,0,0], 1.0);
+<<<<<<< HEAD:blog/dejong/index.html
         var D = new DeJong();
         //var D = new DeJong(0,0,0,0);
         const NP = 30000;
+=======
+        var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
+        const NP = 50000;
+>>>>>>> f4d2c27f2ba328ba331940c5c19ab2519fe39166:dejong/index.html
         const Skip = 50;
         var points = [];
         var Colors = new color_changer();
