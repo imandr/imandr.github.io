@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <script src="drift.js"></script>
+    <script src="canvas.js"></script>
+    <script src="dejong.js"></script>
+    
+    <style type="text/css">
+        #canvas {
+            margin: 0px;
+        }
+    </style>
+    
+</head>
+
+<body>
+    
+    <canvas id="canvas" style="border:1px solid #d3d3d3;"></canvas>
+    <div>
+        <p>A:<span id="a"></span></p>
+        <p>B:<span id="b"></span></p>
+        <p>C:<span id="c"></span></p>
+        <p>D:<span id="d"></span></p>
+    </div>
+    <script>
+        
+        const margin = 100;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        var C = new canvas("canvas", w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5);
+
+        function window_resized(event)
+        {
+            C.resize(document.body.clientWidth-margin*2, document.body.clientHeight-margin*2);
+        }
+        window_resized();
+        window.onresize = window_resized;
+
+
+        C.clear([0,0,0], 1.0);
+        //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
+        var D = new DeJong();
+        //var D = new DeJong(0,0,0,0);
+        const NP = 50000;
+        const Skip = 50;
+        var points = [];
+        var Colors = new ColorChanger();
+
+        for( var i = 0; i < NP; i++ )
+        {
+            points.push([Math.random(), Math.random()]);
+        }
+        
+        for( var t = 0; t < Skip; t++ )
+            points = D.f(points);
+        
+        function step()
+        {
+            var c = Colors.next_color();
+            D.mutate(); 
+            points = D.f(points);
+            //points = D.f(points);
+            //points = D.f(points);
+            C.clear([0,0,0], 0.2);
+            C.points(points, c, 0.07);
+            
+            document.getElementById("a").innerHTML = ""+D.A;
+            document.getElementById("b").innerHTML = ""+D.B;
+            document.getElementById("c").innerHTML = ""+D.C;
+            document.getElementById("d").innerHTML = ""+D.D;
+        }
+
+        setInterval(step, 1000.0/20);
+        
+    </script>
+</body>
+</html>

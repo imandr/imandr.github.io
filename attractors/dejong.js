@@ -18,8 +18,8 @@ function DeJong(a, b, c, d)
             const x = p[0];
             const y = p[1];
             out.push(
-                [Math.sin(this.A*y) - Math.cos(this.B*x) + Math.random()*0.001,
-                Math.sin(this.C*x) - Math.cos(this.D*y) + Math.random()*0.001
+                [Math.sin(this.A*y) - Math.cos(this.B*x) + Math.random()*0.000,
+                Math.sin(this.C*x) - Math.cos(this.D*y) + Math.random()*0.000
                 ]);
         }
         return out;
@@ -45,7 +45,7 @@ function DeJong(a, b, c, d)
             var p1 = points1[i];
             var x = p1[0];
             var y = p1[1];
-            if( Math.random() < 0.1 )
+            if( Math.random() < 0.01 )
             {
                 x += this.normal()*0.002;
                 y += this.normal()*0.002;
@@ -62,7 +62,7 @@ function DeJong(a, b, c, d)
     }
 
     this.Drag = 0.1;
-    this.DragFraction = 0.001;
+    this.DragFraction = 0.1;
     
     this.dragged_fcn = function(points)
     {
@@ -79,8 +79,8 @@ function DeJong(a, b, c, d)
                 const y1 = points1[i][1];
                 const step = Math.random() * this.Drag;
                 p1 = [
-                    x1 + step*(x0-x1),
-                    y1 + step*(y0-y1),
+                    x0 + step*(x1-x0),
+                    y0 + step*(y1-y0)
                 ]
             }
             out.push(p1);
@@ -89,25 +89,57 @@ function DeJong(a, b, c, d)
         return out;
     }
     
-    this.f = this.dragged_fcn;
+    this.dragged_fcn2 = function(points)
+    {
+        var points1 = this.fixed_fcn(points);
+        var i = 0;
+        var out = [];
+        for( var p1 of points1 )
+        {
+            if( Math.random() < this.DragFraction )
+            {
+                const x0 = points[i][0];
+                const y0 = points[i][1];
+                const x1 = points1[i][0];
+                const y1 = points1[i][1];
+                var r = Math.random();
+                r = r*r*this.Drag;
+                p1 = [
+                    x1 + r*(x0-x1),
+                    y1 + r*(y0-y1)
+                ]
+            }
+            out.push(p1);
+            i++;
+        }
+        return out;
+    }
+    
+    this.f = this.dragged_fcn2;
     
     this.Momentum = 0.99;
     this.Rate = 0.03;
-    this.PMin = 2.0;
-    this.PMax = 3.0;
+    this.PMin = 0.5;
+    this.PMax = 2.5;
     this.Range = 1.0;
-    this.LastMutation = [0.0, 0.0, 0.0, 0.0];
     
-    this.Morpher = new Morpher(
-        [this.A-this.Range, this.B-this.Range, this.C-this.Range, this.D-this.Range], 
-        [this.A+this.Range, this.B+this.Range, this.C+this.Range, this.D+this.Range], 
-        0.9, 0.1, 
+    this.A = this.PMin + Math.random()*(this.PMax-this.PMin);
+    this.B = this.PMin + Math.random()*(this.PMax-this.PMin);
+    this.C = this.PMin + Math.random()*(this.PMax-this.PMin);
+    this.D = this.PMin + Math.random()*(this.PMax-this.PMin);
+    
+    this.Morpher = new Morpher([
+            [this.PMin, this.PMax],
+            [this.PMin, this.PMax],
+            [this.PMin, this.PMax],
+            [this.PMin, this.PMax]
+        ],
         [this.A, this.B, this.C, this.D]
     );
 
     this.mutate = function()
     {
-        var params = this.Morpher.step();
+        var params = this.Morpher.step(this.Rate);
         this.A = params[0];
         this.B = params[1];
         this.C = params[2];

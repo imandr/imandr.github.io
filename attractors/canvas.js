@@ -1,6 +1,5 @@
 function rect_mapper(x0, y0, x1, y1, w, h, mode)
 {
-	console.log("rect_mapper: "+[x0, y0, x1, y1, w, h]);
 	// mode is ignored for now
     this.CH = h/2;
     this.CW = w/2;
@@ -12,16 +11,16 @@ function rect_mapper(x0, y0, x1, y1, w, h, mode)
     this.CX = x0 + this.DX/2;
 	this.CY = y0 + this.DY/2;
 	
-    this.ScaleX = w/this.DX;
-    this.ScaleY = h/this.DY;
+    var scalex = w/this.DX;
+    var scaley = h/this.DY;
+
+    this.Scale = scalex < scaley ? scalex : scaley;
 	
-	console.log("rect_mapper: "+[this.CH, this.CW, this.DX, this.DY]);
-    
     this.map_xy = function(x, y)
     {
         return [
-            this.CW + (x-this.CX)*this.ScaleX,
-            this.CH + (y-this.CY)*this.ScaleY
+            this.CW + (x-this.CX)*this.Scale,
+            this.CH + (y-this.CY)*this.Scale
         ];
     }
 
