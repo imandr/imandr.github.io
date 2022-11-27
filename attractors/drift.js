@@ -94,7 +94,7 @@ hsb_to_rgb = function (hsb) {
 
 function ColorChanger()
 {
-    this.SVMin = [0.2, 0.7];
+    this.SVMin = [0.5, 0.8];
     this.SVMax = [0.99, 0.99];
     this.H = 0.2;
     this.DH = 0.0;

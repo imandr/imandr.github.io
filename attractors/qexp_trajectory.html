@@ -42,33 +42,18 @@
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         var D = new QubicExp();
         //var D = new DeJong(0,0,0,0);
-        const NP = 20000;
-        const Skip = 10;
-        var points = D.init_points(NP);
+        const NP = 60000;
+        const Skip = 50;
+        var points = [];
         var Colors = new ColorChanger();
 
-        for( var t = 0; t < Skip; t++ )
-            points = D.f(points);
-        
         function step()
         {
+            let trajectory = D.trajectory([0.1, 0.1], 50000);
             var c = Colors.next_color();
-            D.morph(); 
-            points = D.f(points);
-            if( Math.random() < 0.0 )   
-            {
-                points = D.f(points);
-                if( Math.random() < 0.5 )   points = D.f(points);
-            }
-             //points = D.f(points);
-            //points = D.f(points);
             C.clear([0,0,0], 0.2);
-            C.points(points, c, 0.2);
-            
-            //document.getElementById("a").innerHTML = ""+D.A;
-            //document.getElementById("b").innerHTML = ""+D.B;
-            //document.getElementById("c").innerHTML = ""+D.C;
-            //document.getElementById("d").innerHTML = ""+D.D;
+            C.points(trajectory, c, 0.07);
+            D.morph(); 
         }
 
         setInterval(step, 1000.0/15);
