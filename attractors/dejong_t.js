@@ -1,10 +1,11 @@
-function DeJong(initial)
+function DeJongT(initial)
 {
     this.Momentum = 0.99;
     this.Rate = 0.03;
     this.PMin = 0.5;
     this.PMax = 2.5;
     this.Range = 1.0;
+    this.T = 0.0;
     
     if( initial != null )
     {
@@ -21,6 +22,9 @@ function DeJong(initial)
         this.D = this.PMin + Math.random(this.PMax - this.PMin);
     }
     
+    this.P = this.PMin + Math.random(this.PMax - this.PMin);
+    this.Q = this.PMin + Math.random(this.PMax - this.PMin);
+    
     this.dejong = function(points)
     {
         var out = [];
@@ -29,8 +33,8 @@ function DeJong(initial)
             const x = p[0];
             const y = p[1];
             out.push(
-                [Math.sin(this.A*y) - Math.cos(this.B*x) + Math.random()*0.000,
-                Math.sin(this.C*x) - Math.cos(this.D*y) + Math.random()*0.000
+                [Math.sin(this.A*y) - Math.cos(this.B*x) + Math.sin(this.T*this.P),
+                Math.sin(this.C*x) - Math.cos(this.D*y) + Math.cos(this.T*this.Q)
                 ]);
         }
         return out;
@@ -55,7 +59,9 @@ function DeJong(initial)
 
     this.fixed_dejong = function(points)
     {
-        const points1 = this.dejong(points);
+        var points1 = this.dejong(points);
+        points1 = this.dejong(points1);
+        points1 = this.dejong(points1);
         var out = [];
         var i = 0;
         for( var p0 of points )
@@ -135,7 +141,7 @@ function DeJong(initial)
         return out;
     }
     
-    this.f = this.dragged_fcn2;
+    this.f = this.fixed_dejong;
     
     
     this.A = this.PMin + Math.random()*(this.PMax-this.PMin);
@@ -156,6 +162,7 @@ function DeJong(initial)
         this.B = params[1];
         this.C = params[2];
         this.D = params[3];
+        this.T += 0.005;
     }
 }
 

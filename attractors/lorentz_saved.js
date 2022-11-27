@@ -17,8 +17,8 @@ function Lorentz(b, s, r, t)
 	this.P_11 = 0.8;
 	
 	this.bounds = [
-		[-40.0, -40.0],
-		[40.0, 40.0]
+		[-30.0, -30.0],
+		[30.0, 30.0]
 	];
 	
 	this.NPoints = 20000;
@@ -42,68 +42,19 @@ function Lorentz(b, s, r, t)
         }
 		return points;
 	}
-
-	this.init = function()
-	{
-        var points = [];
-        for( var i = 0; i < this.NPoints; i++ )
-        {
-            const q = Math.random();
-            points.push([0.1, 0.1, q]);
-        }
-		return points;
-	}
 	
 	this.init = function()
 	{
         var points = [];
-		const q0 = -0.5;
-		const q1 = 1.1;
-		const dq = (q1-q0)/this.NPoints;
-        var q;
-        for( var i = 0, q=q0; i < this.NPoints; i++, q+=dq )
+		const z0 = -1;
+		const z1 = 0.3;
+		const dz = (z1-z0)/this.NPoints;
+        for( var i = 0, z=z0; i < this.NPoints; i++, z+=dz )
         {
-            var x, y, z;
-            if( i%3 == 0 )
-            {
-                z = 0.1 + q;
-                x = 0.1;
-                y = 0.1;
-            }
-            else if ( i%3 == 1 )
-            {
-                x = 0.1 + q;
-                y = 0.1;
-                z = 0.1;
-            }
-            else
-            {
-                y = 0.1 + q;
-                z = 0.1;
-                x = 0.1;
-            }
-            if( Math.random() < 0.9 )
-            {
-                const r = 1.0-Math.random()*Math.random();
-                var done = false;
-                while( !done )
-                {
-                    x = Math.random()*2 - 1;
-                    y = Math.random()*2 - 1;
-                    z = Math.random()*2 - 1;
-                    if( x*x + y*y + z*z < 1.0 )
-                    {
-                        x *= r;
-                        y *= r;
-                        z *= r;
-                        done = true;
-                    }
-                }
-                x += 0.1;
-                y += 0.1;
-                z += 0.1;
-            }
-            points.push([x, y, z]);
+			points.push([0.1, 0.1, z]);
+			if( Math.random() < 0.5 )
+				points.push([2.2, 5.3, z]);
+            //points.push([q, q, -1.3]);
         }
 		return points;
 	}
@@ -216,14 +167,21 @@ function Lorentz(b, s, r, t)
     this.Rate = 0.02;
     this.PMin = [1.2, 6.0, 21.0, this.T, -1, -1, -1, -1];
     this.PMax = [2.7, 15.0, 35.0, this.T, 1, 1, 1, 1];
-    this.Morpher = new Morpher(this.PMin, this.PMax, 
-        [this.B, this.S, this.R, this.T, this.P_10, this.P_20, this.P_01, this.P_11]
-    );
-    this.DT = 0.005;
-    
+    this.LastMutation = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
     this.mutate = function()
     {
-        var params = this.Morpher.step(this.DT);
+        var params = [this.B, this.S, this.R, this.T, this.P_10, this.P_20, this.P_01, this.P_11];
+        for( var i=0; i<params.length; i++ )
+        {
+            var d = Math.random() * this.Rate - this.Rate/2;
+            d = this.Momentum * this.LastMutation[i] + (1.0 - this.Momentum) * d;
+            var p1 = params[i] + d;
+            if( p1 > this.PMax[i] ) p1 = this.PMax[i];
+            if( p1 < this.PMin[i] ) p1 = this.PMin[i];
+            this.LastMutation[i] = (p1 - params[i])*0.999;
+            params[i] = p1;            
+        }
         this.B = params[0];
         this.S = params[1];
         this.R = params[2];

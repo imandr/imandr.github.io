@@ -3,7 +3,7 @@
 <head>
     <script src="canvas.js"></script>
     <script src="lorentz.js"></script>
-    <script src="tools.js"></script>
+    <script src="drift.js"></script>
     
 </head>
 
@@ -12,44 +12,6 @@
     <canvas id="canvas" style="border:1px solid #d3d3d3;"></canvas>
     
     <script>
-        
-        function color_changer()
-        {
-            this.H = 0.2;
-            this.DH = 0.0;
-            this.Momentum = 0.9;
-            this.S = this.SMin = 0.3;
-            this.SMax = 0.99;
-            this.DS = 0.0;
-            this.V = 0.99;
-            
-            this.next_color = function()
-            {
-                var d = Math.random()*0.01-0.002;
-                d = this.DH * this.Momentum + d * (1.0 - this.Momentum);
-                if( d < -0.1 )  d = -0.1;
-                if( d > 0.1 ) d = 0.1;
-                var h = this.H + d;
-                this.DH = d;
-                while( h >= 1.0 )
-                    h -= 1.0;
-                while( h < 0.0 )
-                    h += 1.0;
-                this.H = h;
-                
-                d = Math.random()*0.1-0.05;
-                d = this.DS * this.Momentum + d * (1.0 - this.Momentum);
-                if( d < -0.2 )  d = -0.2;
-                if( d > 0.2 ) d = 0.2;
-                var s = this.S + d;
-                if( s > this.SMax ) s = this.SMax;
-                if( s < this.SMin ) s = this.SMin;
-                this.DS = s - this.S;
-                this.S = s;                
-                
-                return hsb_to_rgb([h, s, this.V]);
-            }
-        }
         
         const w = window.innerWidth;
         const h = window.innerHeight;
@@ -71,7 +33,7 @@
         C.clear([0,0,0], 1.0);
         const NP = Morph.NPoints;
         const Skip = 50;
-        var Colors = new color_changer();
+        var Colors = new ColorChanger();
 
         function step()
         {
@@ -79,9 +41,9 @@
             var c = Colors.next_color();
 			
             Morph.mutate(); 
-						
+
             points = Morph.transform(points);
-			const projected = Morph.project(points);
+            const projected = Morph.project(points);
             //points = D.f(points);
             //points = D.f(points);
             C.clear([0,0,0], 0.8);

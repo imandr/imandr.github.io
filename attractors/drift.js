@@ -1,92 +1,20 @@
-hsb_to_rgb = function (hsb) {
-    //
-    // HSB and RGB are all normalized to [0,1.0]
-    //
-    var h = hsb[0];
-    var s = hsb[1];
-    var v = hsb[2];
-
-    if (s == 0)
-        return [v,v,v];
-
-    var t1 = v;
-    var t2 = (1.0 - s) * v;
-    var h6 = h*6.0;
-    var hr = h6 - Math.floor(h6);
-    
-    var t3 = (t1 - t2) * hr;
-    var r, g, b;
-
-    if (h6 < 1) { r = t1; b = t2; g = t2 + t3 }
-    else if (h6 < 2) { g = t1; b = t2; r = t1 - t3 }
-    else if (h6 < 3) { g = t1; r = t2; b = t2 + t3 }
-    else if (h6 < 4) { b = t1; r = t2; g = t1 - t3 }
-    else if (h6 < 5) { b = t1; g = t2; r = t2 + t3 }
-    else if (h6 < 6) { r = t1; g = t2; b = t1 - t3 }
-    else { r = 0; g = 0; b = 0 }
-
-    return [r,g,b];
-}
-
-function ColorChanger()
-{
-    this.H = 0.2;
-    this.DH = 0.0;
-    this.Momentum = 0.9;
-    this.S = this.SMin = 0.3;
-    this.SMax = 0.99;
-    this.DS = 0.0;
-    this.V = 0.99;
-    this.DMax = 0.05;
-
-    this.next_color = function()
-    {
-        var d = Math.random()*0.01-0.002;
-        d = this.DH * this.Momentum + d * (1.0 - this.Momentum);
-        if( d < -this.DMax )  d = -this.DMax;
-        if( d > this.DMax ) d = this.DMax;
-        var h = this.H + d;
-        this.DH = d;
-        while( h >= 1.0 )
-            h -= 1.0;
-        while( h < 0.0 )
-            h += 1.0;
-        this.H = h;
-        
-        d = Math.random()*0.1-0.05;
-        d = this.DS * this.Momentum + d * (1.0 - this.Momentum);
-        if( d < -0.2 )  d = -0.2;
-        if( d > 0.2 ) d = 0.2;
-        var s = this.S + d;
-        if( s > this.SMax ) s = this.SMax;
-        if( s < this.SMin ) s = this.SMin;
-        this.DS = s - this.S;
-        this.S = s;                
-        
-        return hsb_to_rgb([h, s, this.V]);
-    }
-}
-
-function Morpher(ranges, initial)
+function Morpher(pmin, pmax, initial)
 {
     this.M = 0.95;
-    this.PMin = [];
-    this.PMax = [];
+    this.PMin = pmin;
+    this.PMax = pmax;
     this.Lead = [];
     this.Point = [];
     this.V = [];
     this.VMax = [];
     this.A = [];
     var i;
-    for( i=0; i<ranges.length; i++ )
+    for( i=0; i<pmax.length; i++ )
     {
-        var range = ranges[i];
-        var x0 = range[0];
-        var x1 = range[1];
+        var x0 = pmin[i];
+        var x1 = pmax[i];
         var vmax = (x1-x0)/20;
         this.VMax.push(vmax);
-        this.PMin.push(range[0]);
-        this.PMax.push(range[1]);
         var x = x0 + Math.random()*(x1-x0);
         if( initial != null )
             x = initial[i];
@@ -131,6 +59,70 @@ function Morpher(ranges, initial)
             this.Lead[i] = x;
         }
         return this.Point;
+    }
+}
+
+hsb_to_rgb = function (hsb) {
+    //
+    // HSB and RGB are all normalized to [0,1.0]
+    //
+    var h = hsb[0];
+    var s = hsb[1];
+    var v = hsb[2];
+
+    if (s == 0)
+        return [v,v,v];
+
+    var t1 = v;
+    var t2 = (1.0 - s) * v;
+    var h6 = h*6.0;
+    var hr = h6 - Math.floor(h6);
+    
+    var t3 = (t1 - t2) * hr;
+    var r, g, b;
+
+    if (h6 < 1) { r = t1; b = t2; g = t2 + t3 }
+    else if (h6 < 2) { g = t1; b = t2; r = t1 - t3 }
+    else if (h6 < 3) { g = t1; r = t2; b = t2 + t3 }
+    else if (h6 < 4) { b = t1; r = t2; g = t1 - t3 }
+    else if (h6 < 5) { b = t1; g = t2; r = t2 + t3 }
+    else if (h6 < 6) { r = t1; g = t2; b = t1 - t3 }
+    else { r = 0; g = 0; b = 0 }
+
+    return [r,g,b];
+}
+
+function ColorChanger()
+{
+    this.SVMin = [0.2, 0.7];
+    this.SVMax = [0.99, 0.99];
+    this.H = 0.2;
+    this.DH = 0.0;
+    this.Momentum = 0.9;
+    this.S = 0.3;
+    this.DS = 0.0;
+    this.V = 0.99;
+    this.DMax = 0.05;
+    this.SVMorher = new Morpher(this.SVMin, this.SVMax);
+
+    this.next_color = function()
+    {
+        var d = Math.random()*0.01-0.002;
+        d = this.DH * this.Momentum + d * (1.0 - this.Momentum);
+        if( d < -this.DMax )  d = -this.DMax;
+        if( d > this.DMax ) d = this.DMax;
+        var h = this.H + d;
+        this.DH = d;
+        while( h >= 1.0 )
+            h -= 1.0;
+        while( h < 0.0 )
+            h += 1.0;
+        this.H = h;
+        
+        var sv = this.SVMorher.step(0.01);
+        this.S = sv[0];
+        this.V = sv[1];
+        return hsb_to_rgb([this.H, this.S, this.V]);
     }
 }
 

@@ -3,7 +3,7 @@
 <head>
     <script src="drift.js"></script>
     <script src="canvas.js"></script>
-    <script src="dejong.js"></script>
+    <script src="qubic.js"></script>
     
     <style type="text/css">
         #canvas {
@@ -38,21 +38,17 @@
         window_resized();
         window.onresize = window_resized;
 
-
         C.clear([0,0,0], 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
-        var D = new DeJong();
+        var D = new Qubic();
         //var D = new DeJong(0,0,0,0);
         const NP = 60000;
         const Skip = 50;
-        var points = [];
+        var points = D.init_points(NP);
         var Colors = new ColorChanger();
-
-        for( var i = 0; i < NP; i++ )
-        {
-            points.push([Math.random(), Math.random()]);
-        }
         
+        
+
         for( var t = 0; t < Skip; t++ )
             points = D.f(points);
         

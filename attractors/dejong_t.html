@@ -3,7 +3,7 @@
 <head>
     <script src="drift.js"></script>
     <script src="canvas.js"></script>
-    <script src="dejong.js"></script>
+    <script src="dejong_t.js"></script>
     
     <style type="text/css">
         #canvas {
@@ -29,7 +29,7 @@
         const margin = 10;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        var C = new canvas("canvas", w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5);
+        var C = new canvas("canvas", w-margin*2, h-margin*2, -3, -3, 3, 3);
 
         function window_resized(event)
         {
@@ -41,7 +41,7 @@
 
         C.clear([0,0,0], 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
-        var D = new DeJong();
+        var D = new DeJongT();
         //var D = new DeJong(0,0,0,0);
         const NP = 60000;
         const Skip = 50;
