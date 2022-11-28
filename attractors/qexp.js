@@ -1,6 +1,6 @@
 function QubicExp(initial)
 {
-    this.Rate = 0.01;
+    this.Rate = 0.02;
     this.PMin = [0.1, 0.1, 0.1, 0.1];
     this.PMax = [0.7,  0.7,   0.7,  0.7];
     //this.PMin = [0.4, 0.9, 0.32, 0.4];
@@ -21,6 +21,11 @@ function QubicExp(initial)
         this.By = this.PMin[3] + Math.random()*(this.PMax[3] - this.PMin[3]);
     }
     
+    this.P = function(x)
+    {
+        return Math.exp(-x*x);
+    }
+ 
     this.G = function(x)
     {
         return 3*(x*x*x-1.2*x)*Math.exp(-x*x);
@@ -46,7 +51,7 @@ function QubicExp(initial)
             const y = p[1];
             
             out.push([
-                this.G(this.Ax*x) + this.F(this.Bx*y),
+                this.G(this.Ax*x) + this.G(this.Bx*y),
                 this.F(this.Ay*x) + this.G(this.By*y)
             ]);
         }
@@ -73,7 +78,7 @@ function QubicExp(initial)
             var p1 = points1[i];
             var x = p1[0];
             var y = p1[1];
-            if( Math.random() < 0.1 )
+            if( Math.random() < 0.001 )
             {
                 x += this.normal()*0.01;
                 y += this.normal()*0.01;
@@ -111,7 +116,7 @@ function QubicExp(initial)
         return out;
     }
     
-    this.f = this.fixed;
+    this.f = this.qubic_exp;
 
     this.trajectory = function(p0, n)
     {
