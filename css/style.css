@@ -1,0 +1,25 @@
+<style type="text/css">
+    h1 {
+        font-family: "Menlo", Arial;
+        font-size: 48px;
+    }
+    div#contents {
+        margin: 50px 50px;
+        display: block;
+    }
+    div#banner {
+        margin: 50px 50px;
+        font-family: Verdana;
+        font-size: 48px;
+    }
+    p, body, h1, a {
+        font-family: Arial;
+    }
+    body {
+        margin-left: 50px;
+        margin-right: 50px;
+    }
+    .blog_entry td {
+        padding: 10px;
+    }
+</style>

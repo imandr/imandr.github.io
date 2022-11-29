@@ -1,14 +1,6 @@
 <html>
 <head>
-        <style type="text/css">
-            p, body, h1, a {
-                font-family: Arial;
-            }
-            body {
-                margin-left: 50px;
-                margin-right: 50px;
-            }
-        </style>
+        <link rel="stylesheet" href="css/style.css"/>
         <script src="https://d3js.org/d3.v4.js"></script>
 </head>
 <body>
@@ -37,8 +29,12 @@
             }
         ];
     </script>
-        
-    <table id="blog"></table>
+    
+    <div id="banner">Topics</div>
+
+    <div id="contents">
+        <table id="blog"></table>
+    </div>
     
     <script>
         var rows = d3.select("#blog")
