@@ -1,8 +1,9 @@
 function QubicExp(initial, morpher)
 {
     this.Rate = 0.02;
-    this.PMin = [0.2, 0.2, 0.2, 0.2];
-    this.PMax = [1.7,  1.7, 1.7,  1.7];
+    //this.PMin = [0.2, 0.2, 0.2, 0.2];
+    this.PMin = [-2.7, -2.7, -2.7, -2.7];
+    this.PMax = [2.7,  2.7, 2.7,  2.7];
     //this.PMin = [0.4, 0.9, 0.32, 0.4];
     //this.PMax = this.PMin;
     
@@ -81,7 +82,8 @@ function QubicExp(initial, morpher)
         for(let i = 0; i < points.length; i++)
             if( Math.random() < 0.01 )
             {
-                points[i] = this.init_points(1)[0];
+                var random = this.init_points(1);
+                points[i] = this.qubic_exp(random, params)[0];
             }
         
         return this.qubic_exp(points, params);
