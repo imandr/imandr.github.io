@@ -1,24 +1,24 @@
-function QubicExp(initial)
+function QubicExp(initial, morpher)
 {
     this.Rate = 0.02;
-    this.PMin = [0.1, 0.1, 0.1, 0.1];
-    this.PMax = [0.7,  0.7,   0.7,  0.7];
+    this.PMin = [0.2, 0.2, 0.2, 0.2];
+    this.PMax = [1.7,  1.7, 1.7,  1.7];
     //this.PMin = [0.4, 0.9, 0.32, 0.4];
     //this.PMax = this.PMin;
     
     if( initial != null )
     {
-        this.Ax = initial[0];
-        this.Bx = initial[1];
-        this.Ay = initial[2];
-        this.By = initial[3];
+        this.A = initial[0];
+        this.B = initial[1];
+        this.C = initial[2];
+        this.D = initial[3];
     }
     else
     {
-        this.Ax = this.PMin[0] + Math.random()*(this.PMax[0] - this.PMin[0]);
-        this.Bx = this.PMin[1] + Math.random()*(this.PMax[1] - this.PMin[1]);
-        this.Ay = this.PMin[2] + Math.random()*(this.PMax[2] - this.PMin[2]);
-        this.By = this.PMin[3] + Math.random()*(this.PMax[3] - this.PMin[3]);
+        this.A = this.PMin[0] + Math.random()*(this.PMax[0] - this.PMin[0]);
+        this.B = this.PMin[1] + Math.random()*(this.PMax[1] - this.PMin[1]);
+        this.C = this.PMin[2] + Math.random()*(this.PMax[2] - this.PMin[2]);
+        this.D = this.PMin[3] + Math.random()*(this.PMax[3] - this.PMin[3]);
     }
     
     this.P = function(x)
@@ -41,9 +41,24 @@ function QubicExp(initial)
         return 2.3*x*Math.exp(-x*x);
     }
     
-    this.qubic_exp = function(points)
+    this.qubic_exp = function(points, params)
     {
         var out = [];
+        var A,B,C,D;
+        if( params == null )
+        {
+            A = this.A;
+            B = this.B;
+            C = this.C;
+            D = this.D;
+        }
+        else
+        {
+            A = params[0];
+            B = params[1];
+            C = params[2];
+            D = params[3];
+        }
         
         for( p of points )
         {
@@ -51,11 +66,25 @@ function QubicExp(initial)
             const y = p[1];
             
             out.push([
-                this.G(this.Ax*x) + this.G(this.Bx*y),
-                this.F(this.Ay*x) + this.G(this.By*y)
+                this.G(A*x) + this.H(B*y),
+                this.G(C*y) + this.F(D*x)
             ]);
         }
         return out;
+    }
+
+    this.kicked = function(points, params)
+    {
+        var out = [];
+        var noise = [];
+        
+        for(let i = 0; i < points.length; i++)
+            if( Math.random() < 0.01 )
+            {
+                points[i] = this.init_points(1)[0];
+            }
+        
+        return this.qubic_exp(points, params);
     }
 
     this.normal = function()
@@ -66,45 +95,17 @@ function QubicExp(initial)
             - 6.0;
     }
 
-    this.fixed = function(points)
-    {
-        const points1 = this.qubic_exp(points);
-        var out = [];
-        var i = 0;
-        for( var p0 of points )
-        {
-            const x0 = p0[0];
-            const y0 = p0[1];
-            var p1 = points1[i];
-            var x = p1[0];
-            var y = p1[1];
-            if( Math.random() < 0.001 )
-            {
-                x += this.normal()*0.01;
-                y += this.normal()*0.01;
-            }
-            if( Math.abs(x0-x) + Math.abs(y0-y) < 0.001 )
-            {
-                x += this.normal()*0.03;
-                y += this.normal()*0.03;
-            }
-            out.push([x,y]);
-            i++;
-        }
-        return out;
-    }
-
-    this.Morpher = new Morpher(this.PMin, this.PMax, 
-            [this.Ax, this.Bx, this.Ay, this.By]
-    );
+    this.Morpher = morpher == null ? new Morpher(this.PMin, this.PMax, 
+            [this.A, this.B, this.C, this.D]
+    ) : morpher;
 
     this.morph = function()
     {
         var params = this.Morpher.step(this.Rate);
-        this.Ax = params[0];
-        this.Bx = params[1];
-        this.Ay = params[2];
-        this.By = params[3];
+        this.A = params[0];
+        this.B = params[1];
+        this.C = params[2];
+        this.D = params[3];
     }
     
     this.init_points = function(n)
@@ -116,20 +117,7 @@ function QubicExp(initial)
         return out;
     }
     
-    this.f = this.qubic_exp;
-
-    this.trajectory = function(p0, n)
-    {
-        var out = [p0];
-        var p = p0;
-        for( let t = 0; t < n; t++ )
-        {
-            p = this.f([p])[0];
-            out.push(p);
-        }
-        return out;
-    }
-
+    this.f = this.kicked;
 }
 
 

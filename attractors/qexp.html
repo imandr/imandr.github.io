@@ -42,7 +42,7 @@
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         var D = new QubicExp();
         //var D = new DeJong(0,0,0,0);
-        const NP = 20000;
+        const NP = 50000;
         const Skip = 10;
         var points = D.init_points(NP);
         var Colors = new ColorChanger();
@@ -50,47 +50,16 @@
         for( var t = 0; t < Skip; t++ )
             points = D.f(points);
 
-        function kick(points, n, t)
-        {
-            var inx = [];
-            var i;
-            for( i = 0; i < n; i++ )
-                inx.push(Math.floor(Math.random()*points.length-i));
-
-            for( i of inx )
-                points.splice(i, 1);
-            
-            var new_points = D.init_points(n);
-            for( ; t > 0; --t )
-                new_points = D.f(new_points);
-            
-            return points.concat(new_points);
-        }
-        
         function step()
         {
             var c = Colors.next_color();
             D.morph(); 
             points = D.f(points);
-            if( Math.random() < 0.0 )   
-            {
-                points = D.f(points);
-                if( Math.random() < 0.5 )   points = D.f(points);
-            }
-             //points = D.f(points);
-            //points = D.f(points);
             C.clear([0,0,0], 0.2);
             C.points(points, c, 0.2);
-            
-            //document.getElementById("a").innerHTML = ""+D.A;
-            //document.getElementById("b").innerHTML = ""+D.B;
-            //document.getElementById("c").innerHTML = ""+D.C;
-            //document.getElementById("d").innerHTML = ""+D.D;
-
-            points = kick(points, Math.floor(NP*0.05), 5);
         }
 
-        setInterval(step, 1000.0/15);
+        setInterval(step, 1000.0/10);
         
     </script>
 </body>

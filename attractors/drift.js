@@ -94,35 +94,13 @@ hsb_to_rgb = function (hsb) {
 
 function ColorChanger()
 {
-    this.SVMin = [0.5, 0.8];
-    this.SVMax = [0.99, 0.99];
-    this.H = 0.2;
-    this.DH = 0.0;
-    this.Momentum = 0.9;
-    this.S = 0.3;
-    this.DS = 0.0;
-    this.V = 0.99;
-    this.DMax = 0.05;
-    this.SVMorher = new Morpher(this.SVMin, this.SVMax);
-
+    this.Morpher = new Morpher([0.0, 0.2, 0.8], [5.0, 1.0, 1.0]);
+    
     this.next_color = function()
     {
-        var d = Math.random()*0.01-0.002;
-        d = this.DH * this.Momentum + d * (1.0 - this.Momentum);
-        if( d < -this.DMax )  d = -this.DMax;
-        if( d > this.DMax ) d = this.DMax;
-        var h = this.H + d;
-        this.DH = d;
-        while( h >= 1.0 )
-            h -= 1.0;
-        while( h < 0.0 )
-            h += 1.0;
-        this.H = h;
-        
-        var sv = this.SVMorher.step(0.01);
-        this.S = sv[0];
-        this.V = sv[1];
-        return hsb_to_rgb([this.H, this.S, this.V]);
+        var hsb = this.Morpher.step(0.01);
+        var h = hsb[0] - Math.floor(hsb[0]);
+        return hsb_to_rgb([h, hsb[1], hsb[2]]);
     }
 }
 
