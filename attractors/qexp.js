@@ -1,25 +1,59 @@
-function QubicExp(initial, morpher)
+//
+// Unified attractor interface:
+//
+//      constructor:
+//              X()             - does not initalize, use init() later
+//              X(n)            - randomly generate n points
+//              X(points)       - initialize with given points
+//
+//      PMin, PMax -> parameter min and max values, attribute
+//      XMin, XMax -> field range, vectors, attribute, may be approximate, use as suggestion
+//      PDim -> number of parameters, attribute
+//      XDim -> field dimension, e.g. 2, 3, attribute
+//      init(points) - init with set of points - must match the dimension
+//      init(n)      - init with n random points
+//      step(params) -> new points
+//      points() -> current points
+//
+
+function QubicExp(arg)
 {
     this.Rate = 0.02;
-    //this.PMin = [0.2, 0.2, 0.2, 0.2];
-    this.PMin = [-2.7, -2.7, -2.7, -2.7];
-    this.PMax = [2.7,  2.7, 2.7,  2.7];
-    //this.PMin = [0.4, 0.9, 0.32, 0.4];
-    //this.PMax = this.PMin;
-    
-    if( initial != null )
+    this.PMin = [-1.7, -1.7, -2.7, -2.7];
+    this.PMax = [1.7,  1.7, 2.7,  2.7];
+    this.XMin = [-1.0, -1.0];
+    this.XMin = [1.0, 1.0];
+    this.XDim = 2;
+    this.PDim = 4;
+    this.Points = null;
+
+    this.random_point = function()
     {
-        this.A = initial[0];
-        this.B = initial[1];
-        this.C = initial[2];
-        this.D = initial[3];
+            return [Math.random()*2-1, Math.random()*2-1];
     }
-    else
+
+    this.init = function(arg)
     {
-        this.A = this.PMin[0] + Math.random()*(this.PMax[0] - this.PMin[0]);
-        this.B = this.PMin[1] + Math.random()*(this.PMax[1] - this.PMin[1]);
-        this.C = this.PMin[2] + Math.random()*(this.PMax[2] - this.PMin[2]);
-        this.D = this.PMin[3] + Math.random()*(this.PMax[3] - this.PMin[3]);
+        if( arg == null )
+            return;
+        else if( arg.isArray )
+            this.Points = arg.slice();
+        else
+        {
+                this.Points = [];
+                for( let i = 0; i < arg; i++ )
+                    this.Points.push(this.random_point());
+        }
+    }
+
+    if( arg == null )
+        this.Points = null;
+    else
+        this.init(arg);
+    
+    points = function()
+    {
+        return this.Points;
     }
     
     this.P = function(x)
@@ -45,27 +79,15 @@ function QubicExp(initial, morpher)
     this.qubic_exp = function(points, params)
     {
         var out = [];
-        var A,B,C,D;
-        if( params == null )
-        {
-            A = this.A;
-            B = this.B;
-            C = this.C;
-            D = this.D;
-        }
-        else
-        {
-            A = params[0];
-            B = params[1];
-            C = params[2];
-            D = params[3];
-        }
-        
+        const A = params[0];
+        const B = params[1];
+        const C = params[2];
+        const D = params[3];
+
         for( p of points )
         {
             const x = p[0];
             const y = p[1];
-            
             out.push([
                 this.G(A*x) + this.H(B*y),
                 this.G(C*y) + this.F(D*x)
@@ -82,10 +104,9 @@ function QubicExp(initial, morpher)
         for(let i = 0; i < points.length; i++)
             if( Math.random() < 0.01 )
             {
-                var random = this.init_points(1);
+                var random = [this.random_point()];
                 points[i] = this.qubic_exp(random, params)[0];
             }
-        
         return this.qubic_exp(points, params);
     }
 
@@ -97,29 +118,11 @@ function QubicExp(initial, morpher)
             - 6.0;
     }
 
-    this.Morpher = morpher == null ? new Morpher(this.PMin, this.PMax, 
-            [this.A, this.B, this.C, this.D]
-    ) : morpher;
-
-    this.morph = function()
+    this.step = function(params)
     {
-        var params = this.Morpher.step(this.Rate);
-        this.A = params[0];
-        this.B = params[1];
-        this.C = params[2];
-        this.D = params[3];
+        this.Points = this.kicked(this.Points, params);
+        return this.Points;
     }
-    
-    this.init_points = function(n)
-    {
-        var out = [];
-        var i;
-        for( i = 0; i < n; i++ )
-            out.push([Math.random()*2-1, Math.random()*2-1]);
-        return out;
-    }
-    
-    this.f = this.kicked;
 }
 
 

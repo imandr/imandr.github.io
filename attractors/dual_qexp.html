@@ -41,49 +41,56 @@
         C.clear([0,0,0], 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
-        var D1 = new QubicExp();
-        var D2 = new QubicExp();
+        const NP = 30000;
+        var D1 = new QubicExp(NP);
+        var D2 = new QubicExp(NP);
         
-        var M1 = D1.Morpher;
-        var M2 = D2.Morpher;
-        var SM = new Morpher([0.01], [0.99]);
+        var M1 = new Morpher(D1.PMin, D1.PMax);
+        var M2 = new Morpher(D2.PMin, D2.PMax);
+        
+        function params12(dt, m1, m2)
+        {
+            const beta = 0.05;
+            var p1 = m1.step(dt);
+            var p2 = m2.step(dt);
+            var p1_1 = [];
+            for( let i = 0; i < p1.length; i++ )
+            {
+                p1_1.push(p1[i]*beta + p2[i]*(1-beta));
+            }
+            return [p1_1, p2];
+        }
+        
+        var SM = new Morpher([0.2], [0.8]);
         
         //var D = new DeJong(0,0,0,0);
-        const NP = 30000;
-        const Skip = 10;
-        var points1 = D1.init_points(NP);
-        var points2 = D2.init_points(NP);
+        const Skip = 30;
         var Colors1 = new ColorChanger();
         var Colors2 = new ColorChanger();
 
+        const dt = 0.01;
+        var p12 = params12(dt, M1, M2);
+        var p1 = p12[0], p2 = p12[1];
+
         for( var t = 0; t < Skip; t++ )
         {
-            points1 = D1.f(points1);
-            points2 = D2.f(points2);
+            D1.step(p1);
+            D2.step(p2);
         }
-        
-        const dt = 0.01;
-        const beta = 0.05;
         
         function step()
         {
             var c1 = Colors1.next_color();
             var c2 = Colors2.next_color();
-            var params1 = M1.step(dt); 
-            var params2 = M2.step(dt); 
-            var p1 = [];
-            var p2 = [];
-            for( let i = 0; i < params1.length; i++ )
-            {
-                p1.push(params1[i]*beta + params2[i]*(1-beta));
-                p2.push(params2[i]);
-            }
+            p12 = params12(dt, M1, M2);
+            p1 = p12[0];
+            p2 = p12[1];
             
             var share = SM.step(0.03)[0];
             //share = share*share;
             
-            points1 = D1.f(points1, p1);
-            points2 = D2.f(points2, p2);
+            const points1 = D1.step(p1);
+            const points2 = D2.step(p2);
             C.clear([0,0,0], 0.2);
             C.points(points1, c1, 0.1*share);
             C.points(points2, c2, 0.1*(1-share));
