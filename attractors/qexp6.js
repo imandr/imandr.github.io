@@ -19,12 +19,12 @@
 function QubicExp(arg)
 {
     this.Rate = 0.02;
-    this.PMin = [-1.2, -1.2, 0.2, 0.2];
-    this.PMax = [1.2,  1.2,  1.2,  1.2];
+    this.PMin = [-0.8, -0.8, -0.8, -0.8, -0.8, -0.8];
+    this.PMax = [0.8,  0.8, 0.8, 0.8, 0.8, 0.8];
     this.XMin = [-1.0, -1.0];
     this.XMin = [1.0, 1.0];
     this.XDim = 2;
-    this.PDim = 4;
+    this.PDim = 6;
     this.Points = null;
 
     this.normal = function()
@@ -96,14 +96,16 @@ function QubicExp(arg)
         const B = params[1];
         const C = params[2];
         const D = params[3];
+        const P = params[4];
+        const Q = params[5];
 
         for( p of points )
         {
             const x = p[0];
             const y = p[1];
             out.push([
-                this.G(A*x) + this.H(B*y),
-                this.G(C*y) + this.F(D*x)
+                this.G(A*x) + this.H(B*y) + P,
+                this.G(C*y) + this.F(D*x) + Q
             ]);
         }
         return out;

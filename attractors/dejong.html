@@ -41,40 +41,25 @@
 
         C.clear([0,0,0], 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
-        var D = new DeJong();
-        //var D = new DeJong(0,0,0,0);
         const NP = 60000;
-        const Skip = 50;
-        var points = [];
+        var D = new DeJong(NP);
+        //var D = new DeJong(0,0,0,0);
+        const Skip = 10;
+        const dt = 0.01;
         var Colors = new ColorChanger();
+        var PMorpher = new Morpher(D.PMin, D.PMax);
+        var params = PMorpher.step(dt);
 
-        for( var i = 0; i < NP; i++ )
-        {
-            points.push([Math.random(), Math.random()]);
-        }
-        
         for( var t = 0; t < Skip; t++ )
-            points = D.f(points);
+            D.step(params)
         
         function step()
         {
             var c = Colors.next_color();
-            D.morph(); 
-            points = D.f(points);
-            if( Math.random() < 0.0 )   
-            {
-                points = D.f(points);
-                if( Math.random() < 0.5 )   points = D.f(points);
-            }
-             //points = D.f(points);
-            //points = D.f(points);
-            C.clear([0,0,0], 0.5);
-            C.points(points, c, 0.07);
-            
-            //document.getElementById("a").innerHTML = ""+D.A;
-            //document.getElementById("b").innerHTML = ""+D.B;
-            //document.getElementById("c").innerHTML = ""+D.C;
-            //document.getElementById("d").innerHTML = ""+D.D;
+            params = PMorpher.step(dt);; 
+            points = D.step(params);
+            C.clear([0,0,0], 0.2);
+            C.points(points, c, 0.2);
         }
 
         setInterval(step, 1000.0/15);

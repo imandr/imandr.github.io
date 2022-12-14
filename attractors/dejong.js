@@ -1,162 +1,83 @@
-function DeJong(initial)
+function DeJong(arg)
 {
     this.Momentum = 0.99;
     this.Rate = 0.03;
-    this.PMin = 0.5;
-    this.PMax = 2.5;
-    this.Range = 1.0;
-    
-    if( initial != null )
+    this.PMin = [-2.5, -2.5, -2.5, -.5];
+    this.PMax = [2.5, 2.5, 2.5, 2.5];
+    this.XMin = [-1.0, -1.0];
+    this.XMax = [1.0, 1.0];
+    this.XDim = 2;
+    this.PDim = 4;
+    this.Points = null;
+
+    this.random_point = function()
     {
-        this.A = initial[0];
-        this.B = initial[1];
-        this.C = initial[2];
-        this.D = initial[3];
+            return [Math.random()*2-1, Math.random()*2-1];
     }
+
+    this.init = function(arg)
+    {
+        if( arg == null )
+            return;
+        else if( arg.isArray )
+            this.Points = arg.slice();
+        else
+        {
+                this.Points = [];
+                for( let i = 0; i < arg; i++ )
+                    this.Points.push(this.random_point());
+        }
+    }
+
+    if( arg == null )
+        this.Points = null;
     else
+        this.init(arg);
+    
+    points = function()
     {
-        this.A = this.PMin + Math.random(this.PMax - this.PMin);
-        this.B = this.PMin + Math.random(this.PMax - this.PMin);
-        this.C = this.PMin + Math.random(this.PMax - this.PMin);
-        this.D = this.PMin + Math.random(this.PMax - this.PMin);
+        return this.Points;
     }
     
-    this.dejong = function(points)
+    this.dejong = function(points, params)
     {
+        const A = params[0];
+        const B = params[1];
+        const C = params[2];
+        const D = params[3];
         var out = [];
         for( p of points )
         {
             const x = p[0];
             const y = p[1];
             out.push(
-                [Math.sin(this.A*y) - Math.cos(this.B*x) + Math.random()*0.000,
-                Math.sin(this.C*x) - Math.cos(this.D*y) + Math.random()*0.000
+                [Math.sin(A*y) - Math.cos(B*x),
+                Math.sin(C*x) - Math.cos(D*y)
                 ]);
         }
         return out;
     }
     
-    this.dejong_mixed  =function(points)
+    this.kicked = function(points, params)
     {
-        var points1 = this.dejong(points);
-        var tmp = points[1];
-        points1[1] = points1[0];
-        points1[0] = tmp;
-        return points1;
-    }
-
-    this.normal = function()
-    {
-        return Math.random() + Math.random() + Math.random() + Math.random()
-            + Math.random() + Math.random() + Math.random() + Math.random()
-            + Math.random() + Math.random() + Math.random() + Math.random()
-            - 6.0;
-    }
-
-    this.fixed_dejong = function(points)
-    {
-        const points1 = this.dejong(points);
         var out = [];
-        var i = 0;
-        for( var p0 of points )
-        {
-            const x0 = p0[0];
-            const y0 = p0[1];
-            var p1 = points1[i];
-            var x = p1[0];
-            var y = p1[1];
+        var noise = [];
+        
+        for(let i = 0; i < points.length; i++)
             if( Math.random() < 0.01 )
             {
-                x += this.normal()*0.002;
-                y += this.normal()*0.002;
+                var random = [this.random_point()];
+                points[i] = this.dejong(random, params)[0];
             }
-            if( Math.abs(x0-x) + Math.abs(y0-y) < 0.001 )
-            {
-                x += this.normal()*0.05;
-                y += this.normal()*0.06;
-            }
-            out.push([x,y]);
-            i++;
-        }
-        return out;
+        return this.dejong(points, params);
     }
 
-    this.Drag = 0.01;
-    this.DragFraction = 0.01;
-    
-    this.dragged_fcn = function(points)
+    this.step = function(params)
     {
-        var points1 = this.fixed_fcn(points);
-        var i = 0;
-        var out = [];
-        for( var p1 of points1 )
-        {
-            if( Math.random() < this.DragFraction )
-            {
-                const x0 = points[i][0];
-                const y0 = points[i][1];
-                const x1 = points1[i][0];
-                const y1 = points1[i][1];
-                const step = Math.random() * this.Drag;
-                p1 = [
-                    x0 + step*(x1-x0),
-                    y0 + step*(y1-y0)
-                ]
-            }
-            out.push(p1);
-            i++;
-        }
-        return out;
+        this.Points = this.kicked(this.Points, params);
+        return this.Points;
     }
     
-    this.dragged_fcn2 = function(points)
-    {
-        var points1 = this.fixed_dejong(points);
-        var i = 0;
-        var out = [];
-        for( var p1 of points1 )
-        {
-            if( Math.random() < this.DragFraction )
-            {
-                const x0 = points[i][0];
-                const y0 = points[i][1];
-                const x1 = points1[i][0];
-                const y1 = points1[i][1];
-                var r = Math.random();
-                r = r*r*this.Drag;
-                p1 = [
-                    x1 + r*(x0-x1),
-                    y1 + r*(y0-y1)
-                ]
-            }
-            out.push(p1);
-            i++;
-        }
-        return out;
-    }
-    
-    this.f = this.dragged_fcn2;
-    
-    
-    this.A = this.PMin + Math.random()*(this.PMax-this.PMin);
-    this.B = this.PMin + Math.random()*(this.PMax-this.PMin);
-    this.C = this.PMin + Math.random()*(this.PMax-this.PMin);
-    this.D = this.PMin + Math.random()*(this.PMax-this.PMin);
-    
-    this.Morpher = new Morpher(
-            [this.PMin, this.PMin, this.PMin, this.PMin],
-            [this.PMax, this.PMax, this.PMax, this.PMax],
-            [this.A, this.B, this.C, this.D]
-    );
-
-    this.morph = function()
-    {
-        var params = this.Morpher.step(this.Rate);
-        this.A = params[0];
-        this.B = params[1];
-        this.C = params[2];
-        this.D = params[3];
-    }
 }
 
 
