@@ -93,6 +93,8 @@
         {
             var c1 = Colors1.next_color();
             var c2 = Colors2.next_color();
+            for( let i = 0; i < 3; i++ )
+                c2[i] = (2*c2[i] + c1[i])/3;
             var sb = SBM.step(0.03);
             const share = sb[0];
             const beta = sb[1];

@@ -118,7 +118,8 @@ function QubicExp(arg)
             if( Math.random() < 0.03 )
             {
                 const random = [this.random_point()];
-                const tmp = this.qubic_exp(random, params);
+                var tmp = this.qubic_exp(random, params);
+                tmp = this.qubic_exp(tmp, params);
                 points[i] = this.qubic_exp(tmp, params)[0];
             }
         return this.qubic_exp(points, params);
