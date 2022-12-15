@@ -36,7 +36,11 @@
 
         function window_resized(event)
         {
-            C.resize(document.body.clientWidth-margin*2, document.body.clientHeight-margin*2);
+            //var cw = document.body.clientWidth;
+            //var ch = document.body.clientHeight;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            C.resize(w-margin*2, h-margin*2);
         }
         window_resized();
         window.onresize = window_resized;
