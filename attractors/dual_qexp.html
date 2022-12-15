@@ -51,7 +51,7 @@
         C.clear([0,0,0], 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
-        const NP = 40000;
+        const NP = 20000;
         var D1 = new QubicExp(NP);
         var D2 = new QubicExp(NP);
         
@@ -79,8 +79,7 @@
         var Colors1 = new ColorChanger();
         var Colors2 = new ColorChanger();
 
-        const dt = 0.03;
-        const beta = 0.05;
+        const dt = 0.01;
         var p12 = params12(dt, M1, M2, sb[1]);
         var p1 = p12[0], p2 = p12[1];
 
@@ -106,9 +105,9 @@
             
             const points1 = D1.step(p1);
             const points2 = D2.step(p2);
-            C.clear([0,0,0], 0.3);
-            C.points(points1, c1, 0.07*share);
-            C.points(points2, c2, 0.07*(1-share));
+            C.clear([0,0,0], 0.1);
+            C.points(points1, c1, 0.3*share);
+            C.points(points2, c2, 0.3*(1-share));
         }
 
         setInterval(step, 1000.0/15);
