@@ -98,7 +98,7 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
             const mapped = this.Mapper.map_xy(x, y);
             const ix = Math.floor(mapped[0]);
             const iy = Math.floor(mapped[1]);
-            this.Ctx.globalAlpha = alpha/5;
+            this.Ctx.globalAlpha = alpha/2;
             this.Ctx.fillRect(ix-1, iy-1, 2.0, 2.0);
             this.Ctx.globalAlpha = alpha;
             this.Ctx.fillRect(ix, iy, 1.0, 1.0);
