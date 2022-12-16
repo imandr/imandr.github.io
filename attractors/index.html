@@ -2,16 +2,64 @@
 
 <head>
         <link rel="stylesheet" href="../css/style.css"/>
+        <link rel="stylesheet" href="common.css"/>
+        
+    <style type="text/css">
+        #background {
+            display: block;
+            position: fixed;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,1.0);
+        }
+        #foreground {
+            display: block;
+            position: fixed;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.1);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        #banner {
+            color: white;
+        }
+        a, a:visited {
+            color: #FF8;
+            text-decoration: none;
+        }
+        </style>
+        
+    <script src="drift.js"></script>
+    <script src="canvas.js"></script>
+    <script src="qexp.js"></script>
+    <script src="dueling_qexp.js"></script>
+        
 </head>
 
 <body>
-    <div id="banner">Strange attractors, animated</div>
-    <div id="contents">
-        <p><a href="qexp.html">Quadratic Exponents attractor</a></p>
-        <p><a href="dual_qexp.html">Dual Quadratic Exponents attractor</a></p>
-        <p><a href="mixed_qexp.html">Dueling Quadratic Exponents attractor</a></p>
-        <p><a href="dejong.html">Class DeJong attractor</a></p>
-        <p><a href="dejong_t.html">DeJong attractor with time shift</a></p>
+    <div id="background">
+        <canvas id="canvas"></canvas>
+        <script>
+            dueling_qexp.init("canvas");
+        </script>
+    </div>
+    <div id="foreground">
+        <div id="banner">Animated strange attractors</div>
+        <div id="contents">
+            <p><a href="qexp.html">Quadratic Exponents attractor</a></p>
+            <p><a href="dual_qexp.html">Dual Quadratic Exponents attractor</a></p>
+            <p><a href="dueling_qexp.html">Dueling Quadratic Exponents attractor</a></p>
+            <p><a href="dejong.html">Classic DeJong attractor</a></p>
+        </div>
     </div>
 </body>
 

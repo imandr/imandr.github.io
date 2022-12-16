@@ -3,7 +3,8 @@
 <head>
     <script src="drift.js"></script>
     <script src="canvas.js"></script>
-    <script src="dejong.js"></script>
+    <script src="dejong_attractor.js"></script>
+    <script src="single_dejong.js"></script>
     
     <style type="text/css">
         #canvas {
@@ -13,9 +14,9 @@
     
 </head>
 
-<body>
+<body class="noscroll">
     
-    <canvas id="canvas" style="border:1px solid #d3d3d3;"></canvas>
+    <canvas id="canvas"></canvas>
     <!--
         <div>
         <p>A:<span id="a"></span></p>
@@ -25,45 +26,7 @@
         </div>
     -->
     <script>
-        
-        const margin = 10;
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        var C = new canvas("canvas", w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5);
-
-        function window_resized(event)
-        {
-            C.resize(document.body.clientWidth-margin*2, document.body.clientHeight-margin*2);
-        }
-        window_resized();
-        window.onresize = window_resized;
-
-
-        C.clear([0,0,0], 1.0);
-        //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
-        const NP = 60000;
-        var D = new DeJong(NP);
-        //var D = new DeJong(0,0,0,0);
-        const Skip = 10;
-        const dt = 0.01;
-        var Colors = new ColorChanger();
-        var PMorpher = new Morpher(D.PMin, D.PMax);
-        var params = PMorpher.step(dt);
-
-        for( var t = 0; t < Skip; t++ )
-            D.step(params)
-        
-        function step()
-        {
-            var c = Colors.next_color();
-            params = PMorpher.step(dt);; 
-            points = D.step(params);
-            C.clear([0,0,0], 0.2);
-            C.points(points, c, 0.2);
-        }
-
-        setInterval(step, 1000.0/15);
-        
+        single_dejong.init("canvas");
     </script>
 </body>
 </html>

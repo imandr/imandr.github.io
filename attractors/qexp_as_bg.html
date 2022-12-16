@@ -1,0 +1,51 @@
+<html>
+
+<head>
+    <script src="drift.js"></script>
+    <script src="canvas.js"></script>
+    <script src="qexp.js"></script>
+    <script src="dueling_qexp.js"></script>
+    
+    <style type="text/css">
+        canvas {
+            margin: 0px;
+            border: 0px;
+        }
+        body {
+            margin: 0px;
+            overflow: hidden;
+            background-color: black;
+        }
+        #background {
+            display: block;
+            position: fixed;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #foreground {
+            display: block;
+            position: fixed;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.5);
+        }
+    </style>
+    
+</head>
+
+<body>
+    
+    <div id="background">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div id="foreground">
+        <center><p style="margin:200px">Text</p></center>
+    </div>
+    <script>
+        init_dueling_qexp("canvas", "white");
+    </script>
+
+</body>
+</html>
