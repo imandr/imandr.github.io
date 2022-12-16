@@ -16,7 +16,7 @@
 //      points() -> current points
 //
 
-function QubicExp(arg)
+function QubicExp(np, kick)
 {
     this.Rate = 0.02;
     this.PMin = [-1.2, -1.2, 0.2, 0.2];
@@ -25,7 +25,10 @@ function QubicExp(arg)
     this.XMin = [1.0, 1.0];
     this.XDim = 2;
     this.PDim = 4;
-    this.Points = null;
+    this.Points = [];
+    this.NP = np;
+    this.Kick = kick == null ? 0.01 : kick;
+    this.Points = [];
 
     this.normal = function()
     {
@@ -45,30 +48,6 @@ function QubicExp(arg)
             return [Math.random()*2-1, 0.0];
     }
 
-    this.init = function(arg)
-    {
-        if( arg == null )
-            return;
-        else if( arg.isArray )
-            this.Points = arg.slice();
-        else
-        {
-                this.Points = [];
-                for( let i = 0; i < arg; i++ )
-                    this.Points.push(this.random_point());
-        }
-    }
-
-    if( arg == null )
-        this.Points = null;
-    else
-        this.init(arg);
-    
-    points = function()
-    {
-        return this.Points;
-    }
-    
     this.P = function(x)
     {
         return Math.exp(-x*x);
@@ -102,8 +81,10 @@ function QubicExp(arg)
             const x = p[0];
             const y = p[1];
             out.push([
-                this.G(A*x) + this.H(B*y),
-                this.G(C*y) + this.F(D*x)
+                //this.G(A*x) + this.H(B*y),
+                //this.G(C*y) + this.F(D*x)
+                this.F(A*x) + this.H(B*y),
+                this.F(C*y) + this.H(D*x)
             ]);
         }
         return out;
@@ -111,17 +92,16 @@ function QubicExp(arg)
 
     this.kicked = function(points, params)
     {
-        var out = [];
-        var noise = [];
         
-        for(let i = 0; i < points.length; i++)
-            if( Math.random() < 0.03 )
-            {
-                const random = [this.random_point()];
-                var tmp = this.qubic_exp(random, params);
-                tmp = this.qubic_exp(tmp, params);
-                points[i] = this.qubic_exp(tmp, params)[0];
-            }
+        if(this.Kick > 0.0)
+            for(let i = 0; i < points.length; i++)
+                if( Math.random() < this.Kick )
+                {
+                    const random = [this.random_point()];
+                    var tmp = this.qubic_exp(random, params);
+                    //tmp = this.qubic_exp(tmp, params);
+                    points[i] = this.qubic_exp(tmp, params)[0];
+                }
         return this.qubic_exp(points, params);
     }
 
@@ -130,6 +110,12 @@ function QubicExp(arg)
         this.Points = this.kicked(this.Points, params);
         return this.Points;
     }
+
+
+    for( let i = 0; i < np; i++ )
+        this.Points.push(this.random_point());
+
+
 }
 
 
