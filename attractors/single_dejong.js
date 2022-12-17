@@ -4,7 +4,7 @@ var single_dejong = {
         const margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        var C = new canvas("canvas", w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5);
+        var C = new canvas(canvas_id, w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5);
         var clear_rgb = [0,0,0];        // black by default
         if( background == "white" )
             clear_rgb = [1.0,1.0,1.0];
@@ -24,7 +24,7 @@ var single_dejong = {
         C.clear(clear_rgb, 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         const NP = 60000;
-        var D = new DeJong(NP);
+        var D = new DeJong(NP, 0.01);
         //var D = new DeJong(0,0,0,0);
         const Skip = 10;
         const dt = 0.01;

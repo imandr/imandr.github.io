@@ -1,4 +1,4 @@
-function DeJong(arg)
+function DeJong(np, kick)
 {
     this.Momentum = 0.99;
     this.Rate = 0.03;
@@ -8,37 +8,15 @@ function DeJong(arg)
     this.XMax = [1.0, 1.0];
     this.XDim = 2;
     this.PDim = 4;
-    this.Points = null;
+    this.NPoints = np;
+    this.Points = [];
+    this.Kick = kick == null ? 0.0 : kick; 
 
     this.random_point = function()
     {
             return [Math.random()*2-1, Math.random()*2-1];
     }
 
-    this.init = function(arg)
-    {
-        if( arg == null )
-            return;
-        else if( arg.isArray )
-            this.Points = arg.slice();
-        else
-        {
-                this.Points = [];
-                for( let i = 0; i < arg; i++ )
-                    this.Points.push(this.random_point());
-        }
-    }
-
-    if( arg == null )
-        this.Points = null;
-    else
-        this.init(arg);
-    
-    points = function()
-    {
-        return this.Points;
-    }
-    
     this.dejong = function(points, params)
     {
         const A = params[0];
@@ -62,13 +40,13 @@ function DeJong(arg)
     {
         var out = [];
         var noise = [];
-        
-        for(let i = 0; i < points.length; i++)
-            if( Math.random() < 0.01 )
-            {
-                var random = [this.random_point()];
-                points[i] = this.dejong(random, params)[0];
-            }
+        if( this.Kick > 0 )
+            for(let i = 0; i < points.length; i++)
+                if( Math.random() < this.Kick )
+                {
+                    var random = [this.random_point()];
+                    points[i] = this.dejong(random, params)[0];
+                }
         return this.dejong(points, params);
     }
 
@@ -77,6 +55,9 @@ function DeJong(arg)
         this.Points = this.kicked(this.Points, params);
         return this.Points;
     }
+    
+    for( let i = 0; i < this.NPoints; i++ )
+        this.Points.push(this.random_point());
     
 }
 

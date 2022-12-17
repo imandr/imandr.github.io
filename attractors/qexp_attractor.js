@@ -114,8 +114,77 @@ function QubicExp(np, kick)
 
     for( let i = 0; i < np; i++ )
         this.Points.push(this.random_point());
-
-
 }
 
+function QExpJumper(np)
+{
+    this.Rate = 0.02;
+    this.PMin = [-1.2, -1.2, 0.2, 0.2];
+    this.PMax = [1.2,  1.2,  1.2,  1.2];
+    this.XMin = [-1.0, -1.0];
+    this.XMin = [1.0, 1.0];
+    this.XDim = 2;
+    this.PDim = 4;
+    this.Points = [];
+    this.NP = np;
+    this.Kick = kick == null ? 0.01 : kick;
+    this.Points = [];
+
+    this.random_point = function()
+    {
+        return [this.normal(), this.normal()];
+    }
+
+    this.P = function(x)
+    {
+        return Math.exp(-x*x);
+    }
+ 
+    this.G = function(x)
+    {
+        return 3*(x*x*x-1.2*x)*Math.exp(-x*x);
+    }
+    
+    this.F = function(x)
+    {
+        return (1-3.5*x*x)*Math.exp(-x*x);
+    }
+    
+    this.H = function(x)
+    {
+        return 2.3*x*Math.exp(-x*x);
+    }
+    
+    this.qexp_multipar = function(points, params_list)
+    {
+        var out = [];
+        const nparams = params_list.length;
+        for( p of points )
+        {
+            const params = params_list[Math.Floor(Math.random()*nparams)];
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const D = params[3];
+            const x = p[0];
+            const y = p[1];
+            out.push([
+                //this.G(A*x) + this.H(B*y),
+                //this.G(C*y) + this.F(D*x)
+                this.F(A*x) + this.H(B*y),
+                this.F(C*y) + this.H(D*x)
+            ]);
+        }
+        return out;
+    }
+
+    this.step = function(params_list)
+    {
+        this.Points = this.qexp_multipar(points, params_list[iparams]);
+        return this.Points;
+    }
+
+    for( let i = 0; i < np; i++ )
+        this.Points.push(this.random_point());
+}
 
