@@ -40,7 +40,100 @@ function rect_mapper(x0, y0, x1, y1, w, h, mode)
     }
 }
 
-function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
+function adjustable_mapper(x0, y0, x1, y1, w, h, options)
+{
+	// mode is ignored for now
+    this.H = h;
+    this.W = w;
+    this.CH = h/2;
+    this.CW = w/2;
+    
+    this.Beta = 0.0;
+    this.Margin = 0.2;
+    if( options != null )
+    {
+        if( options.beta != null )
+            this.Beta = options.beta;
+        if( options.margin != null )
+            this.Margin = options.margin;
+    }
+
+    // initial values
+    this.DX = x1-x0;
+    this.DY = y1-y0;
+    this.CX = x0 + this.DX/2;
+	this.CY = y0 + this.DY/2;
+    
+    this.scale = function()
+    {
+        const sx = this.W/this.DX;
+        const sy = this.H/this.DY;
+        return sx > sy ? sy : sx;
+    }
+    
+    this.update = function(points)
+    {
+        var xmin = null,
+            xmax = null,
+            ymin = null,
+        ymax = null;
+        for( p of points )
+        {
+            const x = p[0];
+            const y = p[1];
+            if( xmin == null )
+            {
+                xmin = xmax = x;
+                ymin = ymax = y;
+            }
+            else
+            {
+                if( x > xmax )  xmax = x;
+                else if( x < xmin ) xmin = x;
+                if( y > ymax )  ymax = y;
+                else if( y < ymin ) ymin = y;
+            }
+        }
+
+        const cx_target = (xmax + xmin)/2;
+        const cy_target = (ymax + ymin)/2;
+        const dx_target = (1.0 + this.Margin) * (xmax - ymin);
+        const dy_target = (1.0 + this.Margin) * (ymax - ymin);
+        
+        this.CX += this.Beta * (cx_target - this.CX);
+        this.CY += this.Beta * (cy_target - this.CY);
+        this.DX += this.Beta * (dx_target - this.DX);
+        this.DY += this.Beta * (dy_target - this.DY);
+    }
+	
+    this.map_xy = function(x, y, scale)
+    {
+        return [
+            this.CW + (x-this.CX)*scale,
+            this.CH + (y-this.CY)*scale
+        ];
+    }
+
+    this.map_point = function(p, scale)
+    {
+        return this.map_xy(p[0], p[1], scale);
+    }
+    
+    this.map_points = function(points)
+    {
+        var out = [];
+        if( this.Beta > 0 )
+            this.update(points);
+        const scale = this.scale();
+        for( p of points )
+        {
+            out.push(this.map_point(p, scale));
+        }
+        return out;
+    }
+}
+
+function canvas(element_id, dimx, dimy, x0, y0, x1, y1, mapper_options)
 {
 	console.log("canvas: "+dimx+" "+dimy);
     this.C = document.getElementById(element_id);
@@ -53,17 +146,10 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
     this.DX = x1-x0;
     this.DY = y1-y0;
     this.ClearColor = null;
+    this.MapperOptions = mapper_options;
     
-    this.Mapper = new rect_mapper(x0, y0, x1, y1, dimx, dimy);
-    
-    var c1 = this.Mapper.map_xy(x0, y0);
-    var c2 = this.Mapper.map_xy(x1, y1);
-    var c3 = this.Mapper.map_xy(0,0);
-
     this.CX = (x0 + y1)/2;
     this.CY = (y0 + x1)/2;
-
-    this.CenterPull = 0.001; 
        
     this.Ctx = this.C.getContext("2d");
     
@@ -73,7 +159,7 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
         this.DimY = h;
         this.C.setAttribute("width", w);
         this.C.setAttribute("height", h);
-        this.Mapper = new rect_mapper(this.X0, this.Y0, this.X1, this.Y1, w, h);
+        this.Mapper = new adjustable_mapper(this.X0, this.Y0, this.X1, this.Y1, w, h, this.MapperOptions);
         
         this.Ctx.fillStyle = this.ClearColor;
         this.Ctx.fillRect(0, 0, this.DimX, this.DimY);
@@ -85,30 +171,18 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1)
     {
         // color is list of 3 floats from 0 to 1
         this.Ctx.globalAlpha = alpha;
-        this.Ctx.fillStyle = 'rgb(' + Math.floor(color[0]*256) + ',' +  Math.floor(color[1]*256) + ',' +  Math.floor(color[2]*256) + ')';
+        this.Ctx.fillStyle = 'rgba(' + Math.floor(color[0]*256) + ',' +  Math.floor(color[1]*256) + ',' +  Math.floor(color[2]*256) + ')';
         var sx = 0.0;
         var sy = 0.0;
 
-        for( p of points )
+        var mapped = this.Mapper.map_points(points);
+
+        for( p of mapped )
         {        
-            const x = p[0];
-            const y = p[1];
-            sx += x;
-            sy += y;
-            const mapped = this.Mapper.map_xy(x, y);
-            const ix = Math.floor(mapped[0]);
-            const iy = Math.floor(mapped[1]);
-            //this.Ctx.globalAlpha = alpha/10;
-            //this.Ctx.fillRect(ix-1, iy-1, 3.0, 3.0);
-            this.Ctx.globalAlpha = alpha;
+            const ix = Math.floor(p[0]);
+            const iy = Math.floor(p[1]);
             this.Ctx.fillRect(ix, iy, 1.0, 1.0);
         }
-        var cx = sx/points.length;
-        var cy = sy/points.length;
-
-        // pull center
-        //this.CX += this.CenterPull*(cx - this.CX);
-        //this.CY += this.CenterPull*(cy - this.CY);
     }
     
     this.clear = function(color, alpha)

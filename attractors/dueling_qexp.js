@@ -4,7 +4,8 @@ var dueling_qexp = {
             const margin = 0;
             const w = window.innerWidth;
             const h = window.innerHeight;
-            var C = new canvas(canvas_id, w-margin*2, h-margin*2, -3.5, -3.5, 3.5, 3.5);
+            const MapperOptions = {beta:0.0};
+            var C = new canvas(canvas_id, w-margin*2, h-margin*2, -3.5, -3.5, 3.5, 3.5, MapperOptions);
             var clear_rgb = [0,0,0];        // black by default
             if( background == "white" )
                 clear_rgb = [1.0,1.0,1.0];
@@ -84,7 +85,7 @@ var dueling_qexp = {
                 C.points(points2, c2, 0.3*(1-share));
 
                 // mix points
-                const mix_ratio = 0.01;
+                const mix_ratio = 0.25;
                 for( let i = 0; i < points1.length; i++ )
                     if( Math.random() < mix_ratio )
                     {

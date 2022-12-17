@@ -1,11 +1,15 @@
-var dueling_dejong = {
+var dueling_tanh = {
     init: function(canvas_id, background)
         {
             const margin = 0;
             const w = window.innerWidth;
             const h = window.innerHeight;
-            const MapperOptions = {beta:0.01};
-            var C = new canvas(canvas_id, w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5, MapperOptions);
+
+            const NP = 20000;
+            var D1 = new TanhAtt(NP, 0.0);
+            var D2 = new TanhAtt(NP, 0.0);
+
+            var C = new canvas(canvas_id, w-margin*2, h-margin*2, -3, -3, 3, 3);
             var clear_rgb = [0,0,0];        // black by default
             if( background == "white" )
                 clear_rgb = [1.0,1.0,1.0];
@@ -24,9 +28,6 @@ var dueling_dejong = {
             C.clear(clear_rgb, 1.0);
             //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
-            const NP = 20000;
-            var D1 = new DeJong(NP, 0.0);
-            var D2 = new DeJong(NP, 0.0);
         
             var M1 = new Morpher(D1.PMin, D1.PMax);
             var M2 = new Morpher(D2.PMin, D2.PMax);
