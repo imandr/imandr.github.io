@@ -24,9 +24,9 @@ var dual_qexp = {
             C.clear(clear_rgb, 1.0);
             //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
-            const NP = 20000;
-            var D1 = new QubicExp(NP);
-            var D2 = new QubicExp(NP);
+            const NP = 25000;
+            var D1 = new QubicExp(NP, 0.01);
+            var D2 = new QubicExp(NP, 0.01);
         
             var M1 = new Morpher(D1.PMin, D1.PMax);
             var M2 = new Morpher(D2.PMin, D2.PMax);
@@ -80,7 +80,7 @@ var dual_qexp = {
             
                 const points1 = D1.step(p1);
                 const points2 = D2.step(p2);
-                C.clear(clear_rgb, 0.501);
+                C.clear(clear_rgb, 0.2);
                 C.points(points1, c1, 0.3*share);
                 C.points(points2, c2, 0.3*(1-share));
             }

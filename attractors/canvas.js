@@ -181,7 +181,7 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1, mapper_options)
         {        
             const ix = Math.floor(p[0]);
             const iy = Math.floor(p[1]);
-            this.Ctx.fillRect(ix, iy, 1.0, 1.0);
+            this.Ctx.fillRect(ix, iy, 0.5, 0.5);
         }
     }
     

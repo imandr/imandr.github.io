@@ -24,9 +24,9 @@ var dueling_qexp = {
             C.clear(clear_rgb, 1.0);
             //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
-            const NP = 20000;
-            var D1 = new QubicExp(NP, 0.0);
-            var D2 = new QubicExp(NP, 0.0);
+            const NP = 25000;
+            var D1 = new QubicExp(NP, 0.01);
+            var D2 = new QubicExp(NP, 0.01);
         
             var M1 = new Morpher(D1.PMin, D1.PMax);
             var M2 = new Morpher(D2.PMin, D2.PMax);
@@ -85,7 +85,7 @@ var dueling_qexp = {
                 C.points(points2, c2, 0.3*(1-share));
 
                 // mix points
-                const mix_ratio = 0.25;
+                const mix_ratio = 0.01;
                 for( let i = 0; i < points1.length; i++ )
                     if( Math.random() < mix_ratio )
                     {

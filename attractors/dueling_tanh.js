@@ -6,8 +6,8 @@ var dueling_tanh = {
             const h = window.innerHeight;
 
             const NP = 20000;
-            var D1 = new TanhAtt(NP, 0.0);
-            var D2 = new TanhAtt(NP, 0.0);
+            var D1 = new TanhAtt(NP, 0.01);
+            var D2 = new TanhAtt(NP, 0.01);
 
             var C = new canvas(canvas_id, w-margin*2, h-margin*2, -3, -3, 3, 3);
             var clear_rgb = [0,0,0];        // black by default
@@ -86,7 +86,7 @@ var dueling_tanh = {
                 C.points(points2, c2, 0.3*(1-share));
 
                 // mix points
-                const mix_ratio = 0.25;
+                const mix_ratio = 0.01;
                 for( let i = 0; i < points1.length; i++ )
                     if( Math.random() < mix_ratio )
                     {

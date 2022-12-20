@@ -4,7 +4,7 @@ var dueling_dejong = {
             const margin = 0;
             const w = window.innerWidth;
             const h = window.innerHeight;
-            const MapperOptions = {beta:0.01};
+            const MapperOptions = {beta:0.00};
             var C = new canvas(canvas_id, w-margin*2, h-margin*2, -2.5, -2.5, 2.5, 2.5, MapperOptions);
             var clear_rgb = [0,0,0];        // black by default
             if( background == "white" )
@@ -24,9 +24,9 @@ var dueling_dejong = {
             C.clear(clear_rgb, 1.0);
             //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
-            const NP = 20000;
-            var D1 = new DeJong(NP, 0.0);
-            var D2 = new DeJong(NP, 0.0);
+            const NP = 25000;
+            var D1 = new DeJong(NP, 0.01);
+            var D2 = new DeJong(NP, 0.01);
         
             var M1 = new Morpher(D1.PMin, D1.PMax);
             var M2 = new Morpher(D2.PMin, D2.PMax);
@@ -85,7 +85,7 @@ var dueling_dejong = {
                 C.points(points2, c2, 0.3*(1-share));
 
                 // mix points
-                const mix_ratio = 0.25;
+                const mix_ratio = 0.01;
                 for( let i = 0; i < points1.length; i++ )
                     if( Math.random() < mix_ratio )
                     {
