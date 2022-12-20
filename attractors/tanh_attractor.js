@@ -19,8 +19,8 @@
 function TanhAtt(np, kick)
 {
     this.Rate = 0.02;
-    this.PMin = [-2.0, -2.0, -1.0, -1.0, -1.0, -1.0];
-    this.PMax = [2.0, 2.0,  1.0,  1.0, 1.0, 1.0];
+    this.PMin = [-1.5, -1.5, -1.5, -1.5, -1.0, -1.0];
+    this.PMax = [1.5, 1.5,  1.5,  1.5, 1.0, 1.0];
     this.XMin = [-3.0, -3.0];
     this.XMin = [3.0, 3.0];
     this.XDim = 2;
@@ -75,8 +75,10 @@ function TanhAtt(np, kick)
             out.push([
                 //this.G(A*x) + this.H(B*y),
                 //this.G(C*y) + this.F(D*x)
-                this.H(A*x) + this.G(B*y) + E*this.F(y),
-                this.H(C*y) + this.G(D*x) + F*this.F(x)
+                //this.H(A*x) + this.G(B*y) + E*this.F(y),
+                //this.H(C*y) + this.G(D*x) + F*this.F(x)
+                A*this.H(x) + B*this.G(y) + E*this.F(y),
+                C*this.H(y) + D*this.G(x) + F*this.F(x)
             ]);
         }
         return out;

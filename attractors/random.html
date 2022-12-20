@@ -1,0 +1,29 @@
+<html>
+
+<head>
+    <script src="drift.js"></script>
+    <script src="canvas.js"></script>
+    <script src="tanh_attractor.js"></script>
+    <script src="dueling_tanh.js"></script>
+    <script src="qexp_attractor.js"></script>
+    <script src="dueling_qexp.js"></script>
+    <script src="dejong_attractor.js"></script>
+    <script src="dueling_dejong.js"></script>
+    <link rel="stylesheet" type="text/css" href="common.css">
+    
+</head>
+
+<body class="noscroll">
+    
+    <canvas id="canvas"></canvas>
+    <script>
+		var i = Math.floor(Math.random()*3);
+        if( i == 0 )
+			dueling_tanh.init("canvas");
+        else if( i == 1 )
+			dueling_dejong.init("canvas");
+        else
+			dueling_qexp.init("canvas");
+    </script>
+</body>
+</html>

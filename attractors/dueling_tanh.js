@@ -9,7 +9,7 @@ var dueling_tanh = {
             var D1 = new TanhAtt(NP, 0.01);
             var D2 = new TanhAtt(NP, 0.01);
 
-            var C = new canvas(canvas_id, w-margin*2, h-margin*2, -3, -3, 3, 3);
+            var C = new canvas(canvas_id, w-margin*2, h-margin*2, -3.5, -3.5, 3.5, 3.5);
             var clear_rgb = [0,0,0];        // black by default
             if( background == "white" )
                 clear_rgb = [1.0,1.0,1.0];
@@ -26,7 +26,6 @@ var dueling_tanh = {
             window.onresize = window_resized;
 
             C.clear(clear_rgb, 1.0);
-            //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
         
             var M1 = new Morpher(D1.PMin, D1.PMax);
@@ -82,11 +81,11 @@ var dueling_tanh = {
                 var points1 = D1.step(p1);
                 var points2 = D2.step(p2);
                 C.clear(clear_rgb, 0.2);
-                C.points(points1, c1, 0.3*share);
-                C.points(points2, c2, 0.3*(1-share));
+                C.points(points1, c1, 0.5*share);
+                C.points(points2, c2, 0.5*(1-share));
 
                 // mix points
-                const mix_ratio = 0.01;
+                const mix_ratio = 0.03;
                 for( let i = 0; i < points1.length; i++ )
                     if( Math.random() < mix_ratio )
                     {

@@ -81,11 +81,11 @@ var dueling_dejong = {
                 var points1 = D1.step(p1);
                 var points2 = D2.step(p2);
                 C.clear(clear_rgb, 0.2);
-                C.points(points1, c1, 0.3*share);
-                C.points(points2, c2, 0.3*(1-share));
+                C.points(points1, c1, 0.5*share);
+                C.points(points2, c2, 0.5*(1-share));
 
                 // mix points
-                const mix_ratio = 0.01;
+                const mix_ratio = 0.03;
                 for( let i = 0; i < points1.length; i++ )
                     if( Math.random() < mix_ratio )
                     {
