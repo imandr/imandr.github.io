@@ -152,6 +152,7 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1, mapper_options)
     this.CY = (y0 + x1)/2;
        
     this.Ctx = this.C.getContext("2d");
+    this.NextClean = 10;
     
     this.resize = function(w, h)
     {
@@ -167,11 +168,32 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1, mapper_options)
     
     this.resize(dimx, dimy);
     
+    this.clean = function()
+    {
+        var image = this.Ctx.getImageData(0, 0, this.DimX, this.DimY);
+        var bitmap = image.data;
+        var i;
+
+        for( i = 0; i < bitmap.length; i += 4 )
+        {
+            const r = bitmap[i];
+            const g = bitmap[i+1];
+            const b = bitmap[i+2];
+            const v = r + g + b;
+            if( v > 0 && v <= 6 )
+                bitmap[i] = bitmap[i+1] = bitmap[i+2] = 0;
+        }
+        
+        this.Ctx.putImageData(image, 0, 0);
+        this.NextClean = 10;
+        
+    }
+
     this.points = function(points, color, alpha)
     {
         // color is list of 3 floats from 0 to 1
         this.Ctx.globalAlpha = alpha;
-        this.Ctx.fillStyle = 'rgba(' + Math.floor(color[0]*256) + ',' +  Math.floor(color[1]*256) + ',' +  Math.floor(color[2]*256) + ')';
+        this.Ctx.fillStyle = 'rgb(' + Math.floor(color[0]*256) + ',' +  Math.floor(color[1]*256) + ',' +  Math.floor(color[2]*256) + ')';
         var sx = 0.0;
         var sy = 0.0;
 
@@ -183,6 +205,8 @@ function canvas(element_id, dimx, dimy, x0, y0, x1, y1, mapper_options)
             const iy = Math.floor(p[1]);
             this.Ctx.fillRect(ix, iy, 0.5, 0.5);
         }
+        if( --this.NextClean <= 0 )
+            this.clean();
     }
     
     this.clear = function(color, alpha)
