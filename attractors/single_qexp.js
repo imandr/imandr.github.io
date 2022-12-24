@@ -23,8 +23,8 @@ var single_qexp = {
         C.clear(clear_rgb, 1.0);
 
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
-        const NP = 30000;
-        var D = new QubicExp(NP);
+        const NP = 80000;
+        var D = new QubicExp(NP, 0.01);
         var PMorpher = new Morpher(D.PMin, D.PMax);
         //var D = new DeJong(0,0,0,0);
         const Skip = 10;
@@ -37,10 +37,10 @@ var single_qexp = {
         function step()
         {
             var c = Colors.next_color();
-            params = PMorpher.step(0.01);; 
+            params = PMorpher.step(0.02);; 
             points = D.step(params);
             C.clear(clear_rgb, 0.2);
-            C.points(points, c, 0.2);
+            C.points(points, c, 0.3);
         }
 
         setInterval(step, 1000.0/10);

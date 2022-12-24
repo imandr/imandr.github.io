@@ -1,6 +1,14 @@
 var dueling_dejong = {
     init: function(canvas_id, background)
         {
+            const NP = 60000;
+            const dt = 0.02;
+            const Kick = 0.01;
+            const Skip = 30;
+            const MixRatio = 0.03;
+
+            var SBM = new Morpher([0.1, 0.1], [0.5, 0.3]);
+
             const margin = 0;
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -24,9 +32,8 @@ var dueling_dejong = {
             C.clear(clear_rgb, 1.0);
             //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
         
-            const NP = 25000;
-            var D1 = new DeJong(NP, 0.01);
-            var D2 = new DeJong(NP, 0.01);
+            var D1 = new DeJong(NP/2, Kick);
+            var D2 = new DeJong(NP/2, Kick);
         
             var M1 = new Morpher(D1.PMin, D1.PMax);
             var M2 = new Morpher(D2.PMin, D2.PMax);
@@ -43,16 +50,11 @@ var dueling_dejong = {
                 return [p1_1, p2];
             }
         
-            var SBM = new Morpher([0.1, 0.1], [0.5, 0.3]);
             var sb = SBM.step(0.03);
-        
-        
             //var D = new DeJong(0,0,0,0);
-            const Skip = 30;
             var Colors1 = new ColorChanger();
             var Colors2 = new ColorChanger();
 
-            const dt = 0.02;
             var p12 = params12(dt, M1, M2, sb[1]);
             var p1 = p12[0], p2 = p12[1];
 
@@ -85,9 +87,8 @@ var dueling_dejong = {
                 C.points(points2, c2, 0.5*(1-share));
 
                 // mix points
-                const mix_ratio = 0.03;
                 for( let i = 0; i < points1.length; i++ )
-                    if( Math.random() < mix_ratio )
+                    if( Math.random() < MixRatio )
                     {
                         var tmp = points1[i];
                         points1[i] = points2[i];

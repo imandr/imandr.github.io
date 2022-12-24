@@ -1,7 +1,12 @@
 var single_dejong = {
     init: function(canvas_id, background)
     {     
+        const NP = 60000;
+        const dt = 0.01;
         const margin = 0;
+        const Kick = 0.01;
+        const Skip = 10;
+
         const w = window.innerWidth;
         const h = window.innerHeight;
         const MapperOptions = {beta:0.0};
@@ -24,11 +29,8 @@ var single_dejong = {
 
         C.clear(clear_rgb, 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
-        const NP = 60000;
-        var D = new DeJong(NP, 0.01);
+        var D = new DeJong(NP, Kick);
         //var D = new DeJong(0,0,0,0);
-        const Skip = 10;
-        const dt = 0.01;
         var Colors = new ColorChanger();
         var PMorpher = new Morpher(D.PMin, D.PMax);
         var params = PMorpher.step(dt);

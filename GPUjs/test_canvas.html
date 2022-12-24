@@ -1,0 +1,57 @@
+<html>
+
+<body>
+
+<script src="gpu-browser.js"></script>
+<script>
+    const canvas = document.createElement('canvas');
+    document.getElementsByTagName('body')[0].appendChild(canvas);
+    
+    const gpu = new GPU({canvas:canvas});
+    
+    var input = [];
+
+    for( let i = 0; i < 400; i++ )
+    {
+        var row = [];
+        for( let j = 0; j < 400; j++ )
+            row.push([i/400, j/400, 0]);
+        input.push(row);
+    }
+
+    const color_map = gpu.createKernel(function(inp) {
+        const r = inp[this.thread.x][this.thread.y][0];
+        const g = inp[this.thread.x][this.thread.y][1];
+        const b = inp[this.thread.x][this.thread.y][2];
+        this.color(r,g,b,1);
+        //this.color(this.thread.x/400,this.thread.y/400,0,1);
+    }, { output:[400, 400], graphical:true });
+    var out = color_map(input);
+    var nframes = 2;
+    function render()
+    {
+        var inp = [];
+
+        for( let i = 0; i < 400; i++ )
+        {
+            var row = [];
+            for( let j = 0; j < 400; j++ )
+            {
+                row.push([j/400, i/400, (i+j)/800]);
+                input[i][j] = 5;
+            }
+            inp.push(row);
+        }
+
+        color_map(input);
+        //var canvas = color_map.canvas;
+        //document.getElementsByTagName('body')[0].appendChild(canvas);
+        if( --nframes > 0 )
+            window.requestAnimationFrame(render);
+    }
+    window.requestAnimationFrame(render);
+    console.log("done:", out);
+</script>
+    
+</body>
+</html>
