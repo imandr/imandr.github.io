@@ -68,6 +68,21 @@ function QubicExp(np, kick)
         return 2.3*x/Math.cosh(2*x);
     }
     
+    this.G = function(x)
+    {
+        return 4*(x*x*x-x)/Math.cosh(2*x);
+    }
+    
+    this.F = function(x)
+    {
+        return (1-x*x)/Math.cosh(2*x);
+    }
+    
+    this.H = function(x)
+    {
+        return 3*x/Math.cosh(2*x);
+    }
+    
     this.qubic_exp = function(points, params)
     {
         var out = [];

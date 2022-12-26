@@ -2,55 +2,68 @@
 
 <body>
 
+<canvas id="canvas" width=400 height=400></canvas>
+
 <script src="gpu-browser.js"></script>
 <script>
-    const canvas = document.createElement('canvas');
+    const canvas = document.getElementById('canvas');
     document.getElementsByTagName('body')[0].appendChild(canvas);
-    
+
+	const w = 400, h = 400;
+	
+	var bitmap = new Array(w*h*3);
     const gpu = new GPU({canvas:canvas});
     
-    var input = [];
-
-    for( let i = 0; i < 400; i++ )
+    for( let row = 0; row < h; row++ )
     {
-        var row = [];
-        for( let j = 0; j < 400; j++ )
-            row.push([i/400, j/400, 0]);
-        input.push(row);
+        for( let col = 0; col < w; col++ )
+		{
+			const k = (row*w + col) * 3;
+			bitmap[k] = row/400;
+			bitmap[k+1] = col/400;
+			bitmap[k+2] = (row+col)/800;
+		}
     }
 
-    const color_map = gpu.createKernel(function(inp) {
-        const r = inp[this.thread.x][this.thread.y][0];
-        const g = inp[this.thread.x][this.thread.y][1];
-        const b = inp[this.thread.x][this.thread.y][2];
-        this.color(r,g,b,1);
-        //this.color(this.thread.x/400,this.thread.y/400,0,1);
-    }, { output:[400, 400], graphical:true });
-    var out = color_map(input);
-    var nframes = 2;
+	const add_points = gpu.createKernel(function(points, color, alpha, bitmap){
+		const width = this.constants.width;
+		const height = this.constants.width;
+		const x = points[this.thread.x][0];
+		const y = points[this.thread.x][1];
+		const row = Math.floor(y*height);
+		const col = Math.floor(x*width);
+		const k = (row * width + col) * 3;
+		//bitmap[k] = bitmap[k]*(1-alpha) + color[0]*alpha;
+		//bitmap[k+1] = bitmap[k+1]*(1-alpha) + color[1]*alpha;
+		//bitmap[k+2] = bitmap[k+2]*(1-alpha) + color[2]*alpha;
+		return 1;	
+	}, {output:[1], dynamicOutput:true,
+		constants:{
+			width:w,
+			height:h
+		}});
+
+    const render_bitmap = gpu.createKernel(function(bitmap) {
+		var k = (this.constants.width * this.thread.y + this.thread.x) * 3;
+        this.color(bitmap[k],bitmap[k+1],bitmap[k+2],1);
+    }, { output:[400, 400], graphical:true, constants:{ width:w } });
+	
+	
+    var nframes = 200;
     function render()
     {
-        var inp = [];
-
-        for( let i = 0; i < 400; i++ )
-        {
-            var row = [];
-            for( let j = 0; j < 400; j++ )
-            {
-                row.push([j/400, i/400, (i+j)/800]);
-                input[i][j] = 5;
-            }
-            inp.push(row);
-        }
-
-        color_map(input);
+		var points = [];
+		for( let i = 0; i < 100; i++ )
+			points.push([Math.random()*Math.random(), Math.random()*Math.random()]);
+		add_points.setOutput([points.length]);
+		add_points(points, [1.0, 1.0, 1.0], 0.1, bitmap);
+        render_bitmap(bitmap);
         //var canvas = color_map.canvas;
         //document.getElementsByTagName('body')[0].appendChild(canvas);
         if( --nframes > 0 )
             window.requestAnimationFrame(render);
     }
     window.requestAnimationFrame(render);
-    console.log("done:", out);
 </script>
     
 </body>
