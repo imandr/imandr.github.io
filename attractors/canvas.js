@@ -1,3 +1,4 @@
+
 let RectMapper = class {
     constructor(x0, y0, x1, y1, w, h)
     {
@@ -116,9 +117,9 @@ let Canvas = class
             const ix = Math.floor(p[0]);
             const iy = Math.floor(p[1]);
             if( Math.random() < 0.5 )
-                this.Ctx.fillRect(ix-1, iy, 3.0, 1.0);
+                this.Ctx.fillRect(ix-1, iy, 3.5, 0.7);
             else
-                this.Ctx.fillRect(ix, iy-1, 1.0, 3.0);
+                this.Ctx.fillRect(ix, iy-1, 0.7, 3.5);
                 
         }
         if( --this.NextClean <= 0 )
