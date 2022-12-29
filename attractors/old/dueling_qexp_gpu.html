@@ -1,0 +1,21 @@
+<html>
+
+<head>
+    <script src="gpu-browser.js"></script>
+    <script src="drift.js"></script>
+    <script src="canvas_gpu.js"></script>
+    <script src="qexp_attractor_gpu.js"></script>
+    <script src="dueling_qexp_gpu.js"></script>
+    <link rel="stylesheet" type="text/css" href="common.css">
+    
+</head>
+
+<body class="noscroll">
+    
+    <canvas id="canvas"></canvas>
+    <script>
+        let qexp2= new DuelingQExpGPU(document.getElementById("canvas"));
+        qexp2.start();
+    </script>
+</body>
+</html>

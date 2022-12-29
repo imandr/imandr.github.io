@@ -1,0 +1,19 @@
+<html>
+
+<body>
+<script src="gpu-browser.js"></script>
+<script>
+    // GPU is a constructor and namespace for browser
+    const gpu = new GPU();
+    const dummy = gpu.createKernel(function(x, a) {
+        return a;
+    }).setOutput([5]);
+
+    var x = [0.0, 1.1, 2.2, 3.3, 4.4, 5.5];
+    var out = dummy(x, 0.5);
+
+    var out2 = dummy(x, 0.7);
+</script>
+    
+</body>
+</html>

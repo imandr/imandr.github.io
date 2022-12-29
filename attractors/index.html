@@ -38,10 +38,11 @@
         }
         </style>
         
+    <script src="gpu-browser.js"></script>
     <script src="drift.js"></script>
     <script src="canvas.js"></script>
-    <script src="qexp_attractor.js"></script>
-    <script src="dueling_qexp.js"></script>
+    <script src="qexp_attractor_gpu.js"></script>
+    <script src="dueling_qexp_gpu.js"></script>
         
 </head>
 
@@ -49,18 +50,19 @@
     <div id="background">
         <canvas id="canvas"></canvas>
         <script>
-            dueling_qexp.init("canvas");
+            const q = new DuelingQExpGPU(document.getElementById("canvas"));
+            q.start();
         </script>
     </div>
     <div id="foreground">
         <div id="banner">Animated strange attractors</div>
         <div id="contents">
-            <p><a href="dejong.html">Classic DeJong attractor</a></p>
-            <p><a href="dueling_dejong.html">Dual DeJong attractors</a></p>
-            <p><a href="qexp.html">Quadratic Exponents attractor</a></p>
-            <p><a href="dueling_qexp.html">Dual Quadratic Exponents attractor</a></p>
-            <p><a href="tanh.html">Folder attractor</a></p>
-            <p><a href="dueling_tanh.html">Dual Folder attractors</a></p>
+            <p><a href="dejong_gpu.html">Classic DeJong attractor</a></p>
+            <p><a href="dueling_dejong_gpu.html">Dual DeJong attractors</a></p>
+            <p><a href="qexp_gpu.html">Quadratic Exponents attractor</a></p>
+            <p><a href="dueling_qexp_gpu.html">Dual Quadratic Exponents attractor</a></p>
+            <p><a href="tanh_gpu.html">Folder attractor</a></p>
+            <p><a href="dueling_tanh_gpu.html">Dual Folder attractors</a></p>
         </div>
     </div>
 </body>

@@ -1,0 +1,26 @@
+<html>
+
+<body>
+
+<canvas id="canvas" width=400 height=400></canvas>
+
+<script src="gpu-browser.js"></script>
+<script src="mapper.js"></script>
+<script src="canvas_gpu.js"></script>
+<script>
+    const canvas = document.getElementById('canvas');
+    var canvas_gpu = new GPUCanvas(canvas, 0.0, 0.0, 1.0, 1.0);
+    canvas_gpu.resize(400, 400);
+    canvas_gpu.clear([0.0,0.0,0.0], 0.5);
+    canvas_gpu.render();
+    var points = [];
+
+    for( let i = 0; i < 1000; i++ )
+        points.push([Math.random(), Math.random()]);
+    
+    canvas_gpu.points(points, [1.0, 0.5, 1.0], 0.9);
+    canvas_gpu.render();
+</script>
+    
+</body>
+</html>

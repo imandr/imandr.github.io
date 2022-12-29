@@ -17,35 +17,35 @@
 //
 
 
-let QubicExpGPU = class
+let TanhAttGPU = class
 {
     constructor(np, kick)
     {
         this.Rate = 0.02;
-        this.PMin = [-1.2, -1.2, 0.2, 0.2];
-        this.PMax = [1.2,  1.2,  1.2,  1.2];
-        this.XMin = [-1.0, -1.0];
-        this.XMin = [1.0, 1.0];
+        this.PMin = [-1.5, -1.5, -1.5, -1.5, -1.0, -1.0];
+        this.PMax = [1.5, 1.5,  1.5,  1.5, 1.0, 1.0];
+        this.XMin = [-3.0, -3.0];
+        this.XMin = [3.0, 3.0];
         this.XDim = 2;
-        this.PDim = 4;
+        this.PDim = 6;
         this.NP = np;
         this.Kick = kick == null ? 0.01 : kick;
         this.Points = [];
         const gpu = new GPU();
 
-        function G(x)
-        {
-            return 3*(x*x*x-1.2*x)/Math.cosh(2*x);
-        }
-    
         function F(x)
         {
-            return (1-3.5*x*x)/Math.cosh(2*x);
+            return Math.tanh(x);
+        }
+    
+        function G(x)
+        {
+            return Math.tanh(2*x*x-1);
         }
     
         function H(x)
         {
-            return 2.3*x/Math.cosh(2*x);
+            return Math.tanh(x*x*x - 1.5*x + 0.5*x*x);
         }
 
         gpu.addFunction(G);
@@ -58,11 +58,13 @@ let QubicExpGPU = class
                 const B = params[1];
                 const C = params[2];
                 const D = params[3];
+                const E = params[4];
+                const F = params[5];
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
                 return [
-                        F(A*x) + H(B*y),
-                        F(C*y) + H(D*x)
+                        A*this.H(x) + B*this.G(y) + E*this.F(y),
+                        C*this.H(y) + D*this.G(x) + F*this.F(x)
                     ];
             },
             { output: [this.NP] }

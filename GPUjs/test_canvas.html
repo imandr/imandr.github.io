@@ -7,7 +7,6 @@
 <script src="gpu-browser.js"></script>
 <script>
     const canvas = document.getElementById('canvas');
-    document.getElementsByTagName('body')[0].appendChild(canvas);
 
 	const w = 400, h = 400;
 	
@@ -48,15 +47,34 @@
         this.color(bitmap[k],bitmap[k+1],bitmap[k+2],1);
     }, { output:[400, 400], graphical:true, constants:{ width:w } });
 	
-	
-    var nframes = 200;
+	const clear_bitmap = gpu.createKernel(function(bm) {
+        return bm[this.thread.x];
+    }, { output:[400*3] } );
+    
+    /*
+    
+        const alpha = this.constants.alpha;
+        const color = this.constants.color;
+        return alpha;
+        return bitmap[this.thread.x]*(1-alpha) + color[this.thread.x%3]*alpha;
+    */
+    
+
+    function clear(color, alpha)
+    {
+        clear_bitmap.setConstants({color:color, alpha:alpha})
+        bitmap = clear_bitmap(bitmap);
+    }
+    
+    var nframes = 5;
     function render()
     {
 		var points = [];
 		for( let i = 0; i < 100; i++ )
 			points.push([Math.random()*Math.random(), Math.random()*Math.random()]);
-		add_points.setOutput([points.length]);
-		add_points(points, [1.0, 1.0, 1.0], 0.1, bitmap);
+		//add_points.setOutput([points.length]);
+		//add_points(points, [1.0, 1.0, 1.0], 0.1, bitmap);
+        clear([0.5, 0.7, 0.3], 0.001);
         render_bitmap(bitmap);
         //var canvas = color_map.canvas;
         //document.getElementsByTagName('body')[0].appendChild(canvas);

@@ -1,0 +1,24 @@
+<html>
+
+<body>
+
+<script src="gpu-browser.js"></script>
+<script src="mapper.js"></script>
+<script>
+    const mapper = new RectMapper( new GPU(), 0.0, 0.0, 1.0, 1.0, 100, 100);
+    
+    var points = [
+        [0.1, 0.1],
+        [0.2, 0.2],
+        [0.3, 0.3]
+    ];
+    var mapped = mapper.map(points);
+    console.log(mapped);
+    mapped = mapper.map(mapped);
+    console.log(mapped);
+    
+    
+</script>
+    
+</body>
+</html>

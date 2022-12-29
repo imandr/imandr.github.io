@@ -17,15 +17,15 @@
 //
 
 
-let QubicExpGPU = class
+let DeJongGPU = class
 {
     constructor(np, kick)
     {
         this.Rate = 0.02;
-        this.PMin = [-1.2, -1.2, 0.2, 0.2];
-        this.PMax = [1.2,  1.2,  1.2,  1.2];
+        this.PMin = [-2.5, -2.5, -2.5, -.5];
+        this.PMax = [2.5, 2.5, 2.5, 2.5];
         this.XMin = [-1.0, -1.0];
-        this.XMin = [1.0, 1.0];
+        this.XMax = [1.0, 1.0];
         this.XDim = 2;
         this.PDim = 4;
         this.NP = np;
@@ -33,24 +33,6 @@ let QubicExpGPU = class
         this.Points = [];
         const gpu = new GPU();
 
-        function G(x)
-        {
-            return 3*(x*x*x-1.2*x)/Math.cosh(2*x);
-        }
-    
-        function F(x)
-        {
-            return (1-3.5*x*x)/Math.cosh(2*x);
-        }
-    
-        function H(x)
-        {
-            return 2.3*x/Math.cosh(2*x);
-        }
-
-        gpu.addFunction(G);
-        gpu.addFunction(F);
-        gpu.addFunction(H);
         this.qexp_kernel = gpu.createKernel(
             function(points, params)
             {
@@ -61,8 +43,8 @@ let QubicExpGPU = class
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
                 return [
-                        F(A*x) + H(B*y),
-                        F(C*y) + H(D*x)
+                        Math.sin(A*y) - Math.cos(B*x),
+                        Math.sin(C*x) - Math.cos(D*y)
                     ];
             },
             { output: [this.NP] }

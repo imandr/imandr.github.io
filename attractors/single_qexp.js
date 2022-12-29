@@ -1,10 +1,10 @@
 var single_qexp = {
-    init: function(canvas_id, background)
+    init: function(canvas_element, background)
     {
         const margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        var C = new canvas("canvas", w-margin*2, h-margin*2, -3.5, -3.5, 3.5, 3.5);
+        var C = new canvas(canvas_element, w-margin*2, h-margin*2, -3.5, -3.5, 3.5, 3.5);
         var clear_rgb = [0,0,0];        // black by default
         if( background == "white" )
             clear_rgb = [1.0,1.0,1.0];
@@ -17,7 +17,7 @@ var single_qexp = {
             const h = window.innerHeight;
             C.resize(w-margin*2, h-margin*2);
         }
-        window_resized();
+        //window_resized();
         window.onresize = window_resized;
 
         C.clear(clear_rgb, 1.0);
