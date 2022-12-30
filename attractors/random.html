@@ -10,6 +10,8 @@
     <script src="dueling_qexp_gpu.js"></script>
     <script src="dejong_attractor_gpu.js"></script>
     <script src="dueling_dejong_gpu.js"></script>
+    <script src="cubic_attractor_gpu.js"></script>
+    <script src="dueling_cubic_gpu.js"></script>
     <link rel="stylesheet" type="text/css" href="common.css">
     
 </head>
@@ -18,13 +20,15 @@
     
     <canvas id="canvas"></canvas>
     <script>
-		var i = Math.floor(Math.random()*3);
+		var i = Math.floor(Math.random()*4);
         var att = null;
         const canvas = document.getElementById("canvas");
         if( i == 0 )
 			att = new DuelingDeJongGPU(document.getElementById("canvas"));
         else if( i == 1 )
 			att = new DuelingTanhGPU(document.getElementById("canvas"));
+        else if( i == 2 )
+			att = new DuelingCubicGPU(document.getElementById("canvas"));
         else
 			att = new DuelingQExpGPU(document.getElementById("canvas"));
         att.start();

@@ -1,4 +1,4 @@
-let DuelingQExpGPU = class
+let DuelingCubicGPU = class
 {
     constructor(canvas_element)
     {
@@ -25,8 +25,8 @@ let DuelingQExpGPU = class
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
     
         const NP = 40000;
-        this.D1 = new QubicExpGPU(NP, 0.001);
-        this.D2 = new QubicExpGPU(NP, 0.001);
+        this.D1 = new CubicGPU(NP, 0.001);
+        this.D2 = new CubicGPU(NP, 0.001);
     
         this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);

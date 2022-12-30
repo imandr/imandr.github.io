@@ -117,9 +117,9 @@ let Canvas = class
             const ix = Math.floor(p[0]);
             const iy = Math.floor(p[1]);
             if( Math.random() < 0.5 )
-                this.Ctx.fillRect(ix-1, iy, 3.5, 0.7);
+                this.Ctx.fillRect(ix-1, iy, 2.2, 0.7);
             else
-                this.Ctx.fillRect(ix, iy-1, 0.7, 3.5);
+                this.Ctx.fillRect(ix, iy-1, 0.7, 2.2);
                 
         }
         if( --this.NextClean <= 0 )
