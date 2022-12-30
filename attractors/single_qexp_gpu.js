@@ -13,7 +13,7 @@ let SingleQExpGPU = class
         };
         this.C.clear(this.ClearColor, 1.0);
         this.NP = 50000;
-        this.D = new QubicExpGPU(this.NP, 0.001);
+        this.D = new QubicExpGPU(this.NP, 0.03);
         this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
         const Skip = 10;

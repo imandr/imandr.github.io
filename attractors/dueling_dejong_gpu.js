@@ -25,8 +25,8 @@ let DuelingDeJongGPU = class
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
     
         const NP = 40000;
-        this.D1 = new DeJongGPU(NP, 0.001);
-        this.D2 = new DeJongGPU(NP, 0.001);
+        this.D1 = new DeJongGPU(NP, 0.03);
+        this.D2 = new DeJongGPU(NP, 0.03);
     
         this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
