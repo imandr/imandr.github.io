@@ -1,4 +1,3 @@
-
 let RectMapper = class {
     constructor(x0, y0, x1, y1, w, h)
     {
