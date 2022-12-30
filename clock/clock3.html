@@ -1,0 +1,54 @@
+<html>
+<head>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="./collide.js"></script>
+    <script src="clock.js"></script>
+    
+    <style type="text/css">
+        line.mark {
+            stroke: black;
+        }
+        line.hand {
+            stroke: black;
+        }
+        line.hour {
+            stroke-width: 0.018;
+        }
+        line.minute {
+            stroke-width: 0.015;
+        }
+        line.second {
+            stroke-width: 0.010;
+        }
+		svg#clock {
+			display: block;
+			position: absolute;
+		}
+    </style>
+    
+</head>
+
+<body>
+    <svg id="clock"></svg>
+
+	<script>
+		
+		var c = new Clock("clock", window.innerWidth, window.innerHeight);
+		
+        function window_resized(event)
+        {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+			var top = (h - Size)/2;
+			if( top < 0 )	top = 0;
+			var right = (w - Size)/2;
+			if( right < 0 )	right = 0;
+	        var svg = d3.select("#clock").style("top", top+"px").style("right", right+"px");
+        }
+	</script>
+
+
+
+
+</body>
+</html>

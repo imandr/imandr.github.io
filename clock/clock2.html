@@ -19,12 +19,16 @@
         line.second {
             stroke-width: 0.010;
         }
+		svg#clock {
+			display: block;
+			position: absolute;
+		}
     </style>
     
 </head>
 
 <body>
-    <center><svg id="clock"></svg></center>
+    <svg id="clock"></svg>
 
     <script>
         var Size = 500;
@@ -377,7 +381,18 @@
             400
         );
         
-        
+        function window_resized(event)
+        {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+			var top = (h - Size)/2;
+			if( top < 0 )	top = 0;
+			var right = (w - Size)/2;
+			if( right < 0 )	right = 0;
+	        var svg = d3.select("#clock").style("top", top+"px").style("right", right+"px");
+        }
+		
+        window_resized();
     </script>
 
 
