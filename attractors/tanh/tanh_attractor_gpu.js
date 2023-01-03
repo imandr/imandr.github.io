@@ -24,8 +24,9 @@ let TanhAttGPU = class
         this.Rate = 0.02;
         this.PMin = [-1.5, -1.5, -1.5, -1.5, -1.0, -1.0];
         this.PMax = [1.5, 1.5,  1.5,  1.5, 1.0, 1.0];
-        this.XMin = [-3.0, -3.0];
-        this.XMin = [3.0, 3.0];
+        const R = 3.0;
+        this.XMin = [-R, -R];
+        this.XMax = [R, R];
         this.XDim = 2;
         this.PDim = 6;
         this.NP = np;
@@ -105,18 +106,20 @@ let SingleTanhGPU = class
 {
     constructor(canvas_element)
     {
+        this.NP = 50000;
+        this.D = new TanhAttGPU(this.NP, 0.001);
         this.margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        this.C = new Canvas(canvas_element, w, h, -3.5, -3.5, 3.5, 3.5);
+        const xmin = this.D.XMin;
+        const xmax = this.D.XMax;
+        this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
         this.ClearColor = [0,0,0];
         const att = this;
         window.onresize = function() {
             att.resize();
         };
         this.C.clear(this.ClearColor, 1.0);
-        this.NP = 50000;
-        this.D = new TanhAttGPU(this.NP, 0.001);
         this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
         const Skip = 10;
@@ -170,10 +173,15 @@ let DuelingTanhGPU = class
 {
     constructor(canvas_element)
     {
+        const NP = 40000;
+        this.D1 = new TanhAttGPU(NP, 0.03);
+        this.D2 = new TanhAttGPU(NP, 0.03);
         this.margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        this.C = new Canvas(canvas_element, w, h, -3.5, -3.5, 3.5, 3.5);
+        const xmin = this.D1.XMin;
+        const xmax = this.D1.XMax;
+        this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
         this.C.resize(w-this.margin*2, h-this.margin*2);
         this.ClearColor = [0,0,0];
         this.DT = 0.02;
@@ -192,9 +200,6 @@ let DuelingTanhGPU = class
         this.C.clear(this.ClearColor, 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
     
-        const NP = 40000;
-        this.D1 = new TanhAttGPU(NP, 0.03);
-        this.D2 = new TanhAttGPU(NP, 0.03);
     
         this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
@@ -249,8 +254,8 @@ let DuelingTanhGPU = class
         var points1 = this.D1.step(p1);
         var points2 = this.D2.step(p2);
         this.C.clear(this.ClearColor, 0.2);
-        this.C.points(points1, c1, 0.1*share);
-        this.C.points(points2, c2, 0.1*(1-share));
+        this.C.points(points1, c1, 0.2*share);
+        this.C.points(points2, c2, 0.2*(1-share));
 
         // mix points
         const mix_ratio = 0.01;

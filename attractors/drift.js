@@ -69,6 +69,9 @@ hsb_to_rgb = function (hsb) {
     var h = hsb[0];
     var s = hsb[1];
     var v = hsb[2];
+    
+    while( h < 0.0 )
+        h += 1.0;
 
     if (s == 0)
         return [v,v,v];
@@ -94,7 +97,7 @@ hsb_to_rgb = function (hsb) {
 
 function ColorChanger()
 {
-    this.Morpher = new Morpher([0.0, 0.5, 0.8], [5.0, 1.0, 1.0]);
+    this.Morpher = new Morpher([-0.5, 0.1, 0.8], [2.5, 1.0, 1.0]);
     
     this.next_color = function()
     {

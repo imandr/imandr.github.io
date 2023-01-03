@@ -24,8 +24,9 @@ let DeJongGPU = class
         this.Rate = 0.02;
         this.PMin = [-2.5, -2.5, -2.5, -.5];
         this.PMax = [2.5, 2.5, 2.5, 2.5];
-        this.XMin = [-1.0, -1.0];
-        this.XMax = [1.0, 1.0];
+        const R = 3.0;
+        this.XMin = [-R, -R];
+        this.XMax = [R, R];
         this.XDim = 2;
         this.PDim = 4;
         this.NP = np;
@@ -85,18 +86,20 @@ let SingleDeJongGPU = class
 {
     constructor(canvas_element)
     {
+        this.NP = 50000;
+        this.D = new DeJongGPU(this.NP, 0.03);
         this.margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        this.C = new Canvas(canvas_element, w, h, -3.5, -3.5, 3.5, 3.5);
+        const xmin = this.D.XMin;
+        const xmax = this.D.XMax;
+        this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
         this.ClearColor = [0,0,0];
         const qexp = this;
         window.onresize = function() {
             qexp.resize();
         };
         this.C.clear(this.ClearColor, 1.0);
-        this.NP = 50000;
-        this.D = new DeJongGPU(this.NP, 0.03);
         this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
         const Skip = 10;
@@ -105,6 +108,7 @@ let SingleDeJongGPU = class
         var params = this.PMorpher.step(this.DT);
         for( var t = 0; t < Skip; t++ )
             this.D.step(params);
+        this.Animating = false;
     }
 
     resize()
@@ -128,15 +132,19 @@ let SingleDeJongGPU = class
     {
         const qexp = this;
         this.step();
-        window.requestAnimationFrame(function() 
-            {
-                qexp.animate_one_frame()
-            }
-        );
+        if( qexp.Animating )
+        {
+            window.requestAnimationFrame(function() 
+                {
+                    qexp.animate_one_frame()
+                }
+            );
+        }
     }
 
     start()
     {
+        this.Animating = true;
         const qexp = this;
         window.requestAnimationFrame(function() 
             {
@@ -144,16 +152,27 @@ let SingleDeJongGPU = class
             }
         );
     }
+    
+    stop()
+    {
+        this.Animating = false;
+    }
 }
 
 let DuelingDeJongGPU = class
 {
     constructor(canvas_element)
     {
+        const NP = 40000;
+        this.D1 = new DeJongGPU(NP, 0.03);
+        this.D2 = new DeJongGPU(NP, 0.03);
+
         this.margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        this.C = new Canvas(canvas_element, w, h, -3.5, -3.5, 3.5, 3.5);
+        const xmin = this.D1.XMin;
+        const xmax = this.D1.XMax;
+        this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
         this.C.resize(w-this.margin*2, h-this.margin*2);
         this.ClearColor = [0,0,0];
         this.DT = 0.02;
@@ -172,9 +191,6 @@ let DuelingDeJongGPU = class
         this.C.clear(this.ClearColor, 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
     
-        const NP = 40000;
-        this.D1 = new DeJongGPU(NP, 0.03);
-        this.D2 = new DeJongGPU(NP, 0.03);
     
         this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
@@ -248,15 +264,19 @@ let DuelingDeJongGPU = class
     {
         const qexp = this;
         this.step();
-        window.requestAnimationFrame(function() 
-            {
-                qexp.animate_one_frame()
-            }
-        );
+        if( qexp.Animating )
+        {
+            window.requestAnimationFrame(function() 
+                {
+                    qexp.animate_one_frame()
+                }
+            );
+        }
     }
 
     start()
     {
+        this.Animating = true;
         const qexp = this;
         window.requestAnimationFrame(function() 
             {
@@ -265,6 +285,11 @@ let DuelingDeJongGPU = class
         );
     }
     
+    stop()
+    {
+        this.Animating = false;
+    }
+
     resize()
     {
         const w = window.innerWidth;

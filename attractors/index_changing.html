@@ -15,12 +15,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255,255,255,1.0);
+            background-color: black;
         }
         #foreground {
             display: block;
             position: fixed;
-            z-index: 1;
+            z-index: 100;
             width: 100%;
             height: 100%;
             background-color: rgba(255,255,255,0.1);
@@ -45,30 +45,24 @@
     <script src="qexp/qexp_attractor_gpu.js"></script>
     <script src="dejong/dejong_attractor_gpu.js"></script>
     <script src="cubic/cubic_attractor_gpu.js"></script>
+    <script src="changing_background.js"></script>
         
 </head>
 
-<body>
+<body style="background-color: black">
     <div id="background">
-        <canvas id="canvas"></canvas>
-        <script>
-            const q = new DuelingQExpGPU(document.getElementById("canvas"));
-            q.start();
-        </script>
+        <canvas id="canvas1" style="position:fixed; top:0; left:0"></canvas>
+        <canvas id="canvas2" style="position:fixed; top:0; left:0"></canvas>
     </div>
-    <div id="foreground">
-        <div id="banner">Animated strange attractors</div>
-        <div id="contents">
-            <p><a href="dejong/dejong_gpu.html">Classic DeJong attractor</a></p>
-            <p><a href="dejong/dueling_dejong_gpu.html">Dual DeJong attractors</a></p>
-            <p><a href="qexp/qexp_gpu.html">Quadratic Exponents attractor</a></p>
-            <p><a href="qexp/dueling_qexp_gpu.html">Dual Quadratic Exponents attractor</a></p>
-            <p><a href="tanh/tanh_gpu.html">Folder attractor</a></p>
-            <p><a href="tanh/dueling_tanh_gpu.html">Dual Folder attractors</a></p>
-            <p><a href="cubic/cubic_gpu.html">Cubic attractor</a></p>
-            <p><a href="cubic/dueling_cubic_gpu.html">Dual Cubic attractors</a></p>
-        </div>
-    </div>
+    
+    <script>
+        const changer = new ChangingBackground(
+            document.getElementById("canvas1"),
+            document.getElementById("canvas2"),
+            [DuelingDeJongGPU, SingleDeJongGPU]
+        );
+        changer.start();
+    </script>
 </body>
 
 </html>
