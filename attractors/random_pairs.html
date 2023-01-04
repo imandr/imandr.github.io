@@ -1,0 +1,23 @@
+<html>
+
+<head>
+    <script src="gpu-browser.js"></script>
+    <script src="drift.js"></script>
+    <script src="canvas.js"></script>
+    <script src="tanh/tanh_attractor_gpu.js"></script>
+    <script src="qexp/qexp_attractor_gpu.js"></script>
+    <script src="dejong/dejong_attractor_gpu.js"></script>
+    <script src="cubic/cubic_attractor_gpu.js"></script>
+    <script src="random_pairs.js"></script>
+    <link rel="stylesheet" type="text/css" href="common.css">    
+</head>
+
+<body class="noscroll">
+    
+    <canvas id="canvas"></canvas>
+    <script>
+        var pairs = new RandomPairs(document.getElementById("canvas"), [QubicExpGPU, TanhAttGPU, DeJongGPU]);
+        pairs.start();
+    </script>
+</body>
+</html>
