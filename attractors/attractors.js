@@ -3,7 +3,7 @@ class DeJongAttractor extends BaseAttractor
     constructor(np, options)
     {
         const P = 2.5;
-        const R = 3.0;
+        const R = 2.5;
         super(np, [-P, -P, -P, -P], [P, P, P, P],
             [-R, -R], [R, R], 
             options.kick == null ? 0.01 : options.kick, 
@@ -187,4 +187,3 @@ class QExpAttractor extends BaseAttractor
         );
     }
 }
-

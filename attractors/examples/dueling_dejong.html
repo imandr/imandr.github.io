@@ -1,0 +1,30 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../common.css">
+    <script src="../gpu-browser.js"></script>
+    <script src="../drift.js"></script>
+    <script src="../canvas.js"></script>
+    <script src="../attractor_base.js"></script>
+    <script src="../attractors.js"></script>
+    <script src="../animations.js"></script>
+    
+</head>
+
+<body class="noscroll">
+    
+    <canvas id="canvas"></canvas>
+    <script>
+        class DuelingDeJongAnimation extends DuelingAttractorsAnimation
+        {
+            constructor(canvas_element)
+            {
+                super(50000, canvas_element, DeJongAttractor);
+            }
+        }
+        
+        let q = new DuelingDeJongAnimation(document.getElementById("canvas"));
+        q.start();
+    </script>
+</body>
+</html>

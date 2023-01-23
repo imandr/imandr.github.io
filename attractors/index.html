@@ -41,10 +41,9 @@
     <script src="gpu-browser.js"></script>
     <script src="drift.js"></script>
     <script src="canvas.js"></script>
-    <script src="tanh/tanh_attractor_gpu.js"></script>
-    <script src="qexp/qexp_attractor_gpu.js"></script>
-    <script src="dejong/dejong_attractor_gpu.js"></script>
-    <script src="cubic/cubic_attractor_gpu.js"></script>
+    <script src="attractor_base.js"></script>
+    <script src="attractors.js"></script>
+    <script src="animations.js"></script>
         
 </head>
 
@@ -52,21 +51,28 @@
     <div id="background">
         <canvas id="canvas"></canvas>
         <script>
-            const q = new DuelingQExpGPU(document.getElementById("canvas"));
+            class DuelingQExp extends DuelingAttractorsAnimation
+            {
+                constructor(canvas_element, options)
+                {
+                    super(50000, canvas_element, QExpAttractor, options);
+                }
+            }
+            const q = new DuelingQExp(document.getElementById("canvas"));
             q.start();
         </script>
     </div>
     <div id="foreground">
-        <div id="banner">Animated strange attractors</div>
+        <div id="banner">Strange Attractors, Animated</div>
         <div id="contents">
-            <p><a href="dejong/dejong_gpu.html">Classic DeJong attractor</a></p>
-            <p><a href="dejong/dueling_dejong_gpu.html">Dual DeJong attractors</a></p>
-            <p><a href="qexp/qexp_gpu.html">Quadratic Exponents attractor</a></p>
-            <p><a href="qexp/dueling_qexp_gpu.html">Dual Quadratic Exponents attractor</a></p>
-            <p><a href="tanh/tanh_gpu.html">Folder attractor</a></p>
-            <p><a href="tanh/dueling_tanh_gpu.html">Dual Folder attractors</a></p>
-            <p><a href="cubic/cubic_gpu.html">Cubic attractor</a></p>
-            <p><a href="cubic/dueling_cubic_gpu.html">Dual Cubic attractors</a></p>
+            <p><a href="examples/single_dejong.html">Classic DeJong attractor</a></p>
+            <p><a href="examples/dueling_dejong.html">Dual DeJong attractors</a></p>
+            <p><a href="examples/single_cubic.html">Cubic attractor</a></p>
+            <p><a href="examples/single_qexp.html">QExp attractor</a></p>
+            <p><a href="examples/trace_qexp.html">Traced QExp attractor</a></p>
+            <p><a href="examples/trace_tanh.html">Traced Crab attractor</a></p>
+            <p>&nbsp;</p>
+            <p><a href="random.html">Random attractor animation</a></p>
         </div>
     </div>
 </body>

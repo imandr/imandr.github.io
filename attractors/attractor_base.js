@@ -62,9 +62,13 @@ class BaseAttractor
         }
 
         this.random_point = this.random_point_uniform;
-
+        this.init_points();
+    }
+    
+    init_points()
+    {
         this.Points = [];
-        for( let i = 0; i < np; i++ )
+        for( let i = 0; i < this.NP; i++ )
             this.Points.push(this.random_point());
     }
 
@@ -81,11 +85,8 @@ class BaseAttractor
                 {
                     this.Points[i] = this.random_point()
                 }
-        var points1 = this.transform_kernel(this.Points, params);
-        if( this.Pull != 1.0 )
-            points1 = this.pull_kernel(this.Points, points1, this.Pull)
+        var points1 = this.transform(this.Points, params, this.Pull);
         this.Points = points1;
         return this.Points;
     }
 }
-
