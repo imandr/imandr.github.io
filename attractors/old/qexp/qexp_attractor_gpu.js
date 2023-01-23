@@ -295,3 +295,151 @@ let DuelingQExpGPU = class
         this.C.resize(w-this.margin*2, h-this.margin*2);
     };
 }
+
+let TripleQExp = class
+{
+    constructor(canvas_element)
+    {
+        const NP = 30000;
+        this.DT = 0.02;
+        const Beta = 0.1;
+        this.D1 = new QubicExpGPU(NP, this.DT);
+        this.D2 = new QubicExpGPU(NP, this.DT);
+        this.D3 = new QubicExpGPU(NP, this.DT);
+        this.margin = 0;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const xmin = this.D1.XMin;
+        const xmax = this.D1.XMax;
+        this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
+        //this.C.resize(w-this.margin*2, h-this.margin*2);
+        this.ClearColor = [0,0,0];
+
+        this.window_resized = function(event)
+        {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            this.C.resize(w-margin*2, h-margin*2);
+        }
+        const qexp = this;
+        window.onresize = function() {
+            qexp.resize();
+        };
+
+        this.C.clear(this.ClearColor, 1.0);
+        //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
+    
+    
+        this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
+        this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
+        this.M3 = new Morpher(this.D3.PMin, this.D3.PMax);
+    
+        this.params123 = function(dt, m1, m2, m3, beta1, beta2)
+        {
+            var p1 = m1.step(dt);
+            var p2 = m2.step(dt);
+            var p3 = m2.step(dt);
+            var p2_1 = [];
+            var p3_1 = [];
+            for( let i = 0; i < p1.length; i++ )
+            {
+                const p = p2[i]*beta1 + p1[i]*(1-beta1);
+                p2_1.push(p);
+                p3_1.push(p3[i]*beta2 + p*(1-beta2));
+            }
+            return [p1, p2_1, p3_1];
+        }
+
+        this.ShareBetaMorpher = new Morpher([0.2, 0.2, 0.05, 0.1], [0.8, 0.8, 0.2, 0.4]);    
+        this.shares_beta = function()
+        {
+            const s = this.ShareBetaMorpher.step(this.DT);
+            return [s[0], (1.0-s[0])*s[1], (1.0-s[0])*(1.0-s[1]), s[2], s[3]*s[3]];
+        }
+    
+        this.Colors1 = new ColorChanger();
+        this.Colors2 = new ColorChanger();
+        this.Colors3 = new ColorChanger();
+
+        const sb = this.shares_beta();
+
+        const p123 = this.params123(this.DT, this.M1, this.M2, this.M3, sb[3], sb[4]);
+        const p1 = p123[0], p2 = p123[1], p3=p123[2];
+
+        const Skip = 10;
+        for( var t = 0; t < Skip; t++ )
+        {
+            this.D1.step(p1);
+            this.D2.step(p2);
+            this.D3.step(p3);
+        }
+    }
+    
+    step()
+    {
+        var c1 = this.Colors1.next_color();
+        var c2 = this.Colors2.next_color();
+        var c3 = this.Colors3.next_color();
+        for( let i = 0; i < 3; i++ )
+        {
+            c2[i] = (2*c2[i] + c1[i])/3;
+            c3[i] = (2*c3[i] + c2[i])/3;
+        }
+        const sb = this.shares_beta();
+        const s1 = sb[0], s2 = sb[1], s3 = sb[2];
+        const beta1 = sb[3], beta2 = sb[4];
+    
+        const p123 = this.params123(this.DT, this.M1, this.M2, this.M3, beta1, beta2);
+        const p1 = p123[0], p2 = p123[1], p3=p123[2];
+
+        //share = share*share;
+    
+        var points1 = this.D1.step(p1);
+        var points2 = this.D2.step(p2);
+        var points3 = this.D3.step(p3);
+        this.C.clear(this.ClearColor, 0.2);
+        this.C.points(points1, c1, 0.2*s1);
+        this.C.points(points2, c2, 0.2*s2);
+        this.C.points(points3, c3, 0.2*s3);
+
+        // mix points
+        const mix_ratio = 0.03;
+        for( let i = 0; i < points1.length; i++ )
+        if( Math.random() < mix_ratio )
+        {
+            var tmp = points1[i];
+            points1[i] = points2[i];
+            points2[i] = points3[i];
+            points3[i] = tmp;
+        }
+        this.C.render();
+    }
+    
+    animate_one_frame()
+    {
+        const qexp = this;
+        this.step();
+        window.requestAnimationFrame(function() 
+            {
+                qexp.animate_one_frame()
+            }
+        );
+    }
+
+    start()
+    {
+        const qexp = this;
+        window.requestAnimationFrame(function() 
+            {
+                qexp.animate_one_frame()
+            }
+        );
+    }
+    
+    resize()
+    {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        this.C.resize(w-this.margin*2, h-this.margin*2);
+    };
+}

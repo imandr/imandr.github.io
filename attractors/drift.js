@@ -97,7 +97,7 @@ hsb_to_rgb = function (hsb) {
 
 function ColorChanger()
 {
-    this.Morpher = new Morpher([-0.5, 0.1, 0.8], [5.5, 1.0, 1.0]);
+    this.Morpher = new Morpher([-0.5, 0.8, 0.8], [5.5, 1.0, 1.0]);
     
     this.next_color = function()
     {

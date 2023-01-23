@@ -1,93 +1,12 @@
-//
-// Unified attractor interface:
-//
-//      constructor:
-//              X()             - does not initalize, use init() later
-//              X(n)            - randomly generate n points
-//              X(points)       - initialize with given points
-//
-//      PMin, PMax -> parameter min and max values, attribute
-//      XMin, XMax -> field range, vectors, attribute, may be approximate, use as suggestion
-//      PDim -> number of parameters, attribute
-//      XDim -> field dimension, e.g. 2, 3, attribute
-//      init(points) - init with set of points - must match the dimension
-//      init(n)      - init with n random points
-//      step(params) -> new points
-//      points() -> current points
-//
-
-
-let DeJongGPU = class
+class SingleAttractorAnimation
 {
-    constructor(np, kick)
+    constructor(np, canvas_element, attractor_class, options)
     {
-        this.Rate = 0.02;
-        this.PMin = [-2.5, -2.5, -2.5, -.5];
-        this.PMax = [2.5, 2.5, 2.5, 2.5];
-        const R = 3.0;
-        this.XMin = [-R, -R];
-        this.XMax = [R, R];
-        this.XDim = 2;
-        this.PDim = 4;
+        if( options == null )
+            options = {};
         this.NP = np;
-        this.Kick = kick == null ? 0.01 : kick;
-        this.Points = [];
-        const gpu = new GPU();
-
-        this.qexp_kernel = gpu.createKernel(
-            function(points, params)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                return [
-                        Math.sin(A*y) - Math.cos(B*x),
-                        Math.sin(C*x) - Math.cos(D*y)
-                    ];
-            },
-            { output: [this.NP] }
-        );
-
-        this.normal = function()
-        {
-            return Math.random() + Math.random() + Math.random() + Math.random()
-                + Math.random() + Math.random() + Math.random() + Math.random()
-                + Math.random() + Math.random() + Math.random() + Math.random()
-                - 6.0;
-        }
-
-        this.random_point = function()
-        {
-            return [this.normal(), this.normal()];
-        }
-
-        this.Points = [];
-        for( let i = 0; i < np; i++ )
-            this.Points.push(this.random_point());
-    }
-
-    step(params)
-    {
-        if(this.Kick > 0.0)
-            for(let i = 0; i < this.Points.length; i++)
-                if( Math.random() < this.Kick )
-                {
-                    this.Points[i] = this.random_point()
-                }
-        this.Points = this.qexp_kernel(this.Points, params);
-        return this.Points;
-    }
-}
-
-let SingleDeJongGPU = class
-{
-    constructor(canvas_element)
-    {
-        this.NP = 50000;
-        this.D = new DeJongGPU(this.NP, 0.03);
+        this.D = new attractor_class(this.NP, options);
+        this.DT = options.dt == null ? 0.01 : options.dt;
         this.margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
@@ -103,7 +22,6 @@ let SingleDeJongGPU = class
         this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
         const Skip = 10;
-        this.DT = 0.01;
         this.Colors = new ColorChanger();
         var params = this.PMorpher.step(this.DT);
         for( var t = 0; t < Skip; t++ )
@@ -121,7 +39,7 @@ let SingleDeJongGPU = class
     step()
     {
         const c = this.Colors.next_color();
-        const params = this.PMorpher.step(this.DT);; 
+        const params = this.PMorpher.step(this.DT);
         const points = this.D.step(params);
         this.C.clear(this.ClearColor, 0.2);
         this.C.points(points, c, 0.2);
@@ -159,13 +77,21 @@ let SingleDeJongGPU = class
     }
 }
 
-let DuelingDeJongGPU = class
+class DuelingAttractorsAnimation
 {
-    constructor(canvas_element)
+    constructor(np, canvas_element, attractor_class, options)
     {
-        const NP = 40000;
-        this.D1 = new DeJongGPU(NP, 0.03);
-        this.D2 = new DeJongGPU(NP, 0.03);
+        if( options == null )
+            options = {};
+        const att1_options = options.attractors == null || options.attractors[0] == null ? {} : options.attractors[0];
+        const att2_options = options.attractors == null || options.attractors[1] == null ? {} : options.attractors[1];
+        this.NP = 40000;
+        this.D1 = new attractor_class(this.NP, att1_options);
+        this.D2 = new attractor_class(this.NP, att2_options);
+        this.DT = options.dt == null ? 0.02 : options.dt;
+        this.Mix = options.mix == null ? 0.01 : options.mix;
+        this.Share = options.share;
+        this.Beta = options.beta;
 
         this.margin = 0;
         const w = window.innerWidth;
@@ -175,7 +101,6 @@ let DuelingDeJongGPU = class
         this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
         this.C.resize(w-this.margin*2, h-this.margin*2);
         this.ClearColor = [0,0,0];
-        this.DT = 0.02;
 
         this.window_resized = function(event)
         {
@@ -233,8 +158,8 @@ let DuelingDeJongGPU = class
         for( let i = 0; i < 3; i++ )
             c2[i] = (c2[i] + c1[i])/2;
         const sb = this.SBM.step(0.03);
-        const share = sb[0];
-        const beta = sb[1];
+        const share = this.Share == null ? sb[0] : this.Share;
+        const beta = this.Beta == null ? sb[1] : this.Beta;
     
         const p12 = this.params12(this.DT, this.M1, this.M2, beta);
         const p1 = p12[0];
@@ -244,19 +169,31 @@ let DuelingDeJongGPU = class
     
         var points1 = this.D1.step(p1);
         var points2 = this.D2.step(p2);
-        this.C.clear(this.ClearColor, 0.2);
-        this.C.points(points1, c1, 0.2*share);
-        this.C.points(points2, c2, 0.2*(1-share));
+        this.C.clear(this.ClearColor, 0.3);
+        var s1 = share;
+        var s2 = 1-share;
+        if( s1 > s2 )
+        {
+            s2 = s2/s1 * 0.4;
+            s1 = 0.4;
+        }
+        else
+        {
+            s1 = s1/s2 * 0.4;
+            s2 = 0.4;
+        }
+        this.C.points(points1, c1, s1);
+        this.C.points(points2, c2, s2);
 
         // mix points
-        const mix_ratio = 0.01;
-        for( let i = 0; i < points1.length; i++ )
-        if( Math.random() < mix_ratio )
-        {
-            var tmp = points1[i];
-            points1[i] = points2[i];
-            points2[i] = tmp;
-        }
+        if( this.Mix > 0 )
+            for( let i = 0; i < points1.length; i++ )
+                if( Math.random() < this.Mix )
+                {
+                    var tmp = points1[i];
+                    points1[i] = points2[i];
+                    points2[i] = tmp;
+                }
         this.C.render();
     }
     

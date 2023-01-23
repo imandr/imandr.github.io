@@ -1,0 +1,35 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../common.css">
+    <script src="../gpu-browser.js"></script>
+    <script src="../drift.js"></script>
+    <script src="../canvas.js"></script>
+    <script src="attractor_base.js"></script>
+    <script src="attractors.js"></script>
+    <script src="animations.js"></script>
+    
+</head>
+
+<body class="noscroll">
+    
+    <canvas id="canvas"></canvas>
+    <script>
+        class SingleCubicAnimation extends SingleAttractorAnimation
+        {
+            constructor(canvas_element)
+            {
+                const options = {
+                    kick: 0.03,
+                    dt: 0.05,
+                    pull: 0.9
+                }
+                super(50000, canvas_element, CubicAttractor, options);
+            }
+        }
+        
+        let q = new SingleCubicAnimation(document.getElementById("canvas"));
+        q.start();
+    </script>
+</body>
+</html>

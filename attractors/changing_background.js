@@ -42,7 +42,8 @@ let ChangingBackground = class
                     else
                     {
                         clearInterval(handle);
-                        callback(param);
+                        if( callback != null )
+                            callback(param);
                     }
                 },
                 dt
@@ -56,10 +57,18 @@ let ChangingBackground = class
         this.PrevCanvas = this.Canvas2;
         this.Canvas.style.opacity = 0.0;
         this.PrevCanvas.style.opacity = 0.0;
-        const att = this.random_attractor(this.Canvas);
         att.start();
         this.start_fade(this.Canvas, 1.0, function(){
             console.log("fade in done");
         }, null);
     }    
+    
+    flip()
+    {
+        let tmp = this.PrevCanvas;
+        this.PrevCanvas = this.Canvas;
+        this.Canvas = tmp;
+        const att = this.random_attractor(this.Canvas);
+        
+    }
 }

@@ -1,32 +1,48 @@
 <html>
 
 <head>
+    <link rel="stylesheet" type="text/css" href="common.css">
     <script src="gpu-browser.js"></script>
     <script src="drift.js"></script>
     <script src="canvas.js"></script>
-    <script src="tanh/tanh_attractor_gpu.js"></script>
-    <script src="qexp/qexp_attractor_gpu.js"></script>
-    <script src="dejong/dejong_attractor_gpu.js"></script>
-    <script src="cubic/cubic_attractor_gpu.js"></script>
-    <link rel="stylesheet" type="text/css" href="common.css">    
+    <script src="attractor_base.js"></script>
+    <script src="attractors.js"></script>
+    <script src="animations.js"></script>
+    
 </head>
 
 <body class="noscroll">
     
     <canvas id="canvas"></canvas>
     <script>
-		var i = Math.floor(Math.random()*4);
-        var att = null;
-        const cnv = document.getElementById("canvas");
-        if( i == 0 )
-			att = new DuelingDeJongGPU(cnv);
-        else if( i == 1 )
-			att = new DuelingTanhGPU(cnv);
-        else if( i == 2 )
-			att = new DuelingCubicGPU(cnv);
-        else
-			att = new DuelingQExpGPU(cnv);
-        att.start();
+        class Dueling extends DuelingAttractorsAnimation
+        {
+            constructor(canvas_element, options)
+            {
+                const i = Math.floor(Math.random() * 4);
+                const att = [
+                    DeJongAttractor, QExpAttractor, CubicAttractor, TanhAttractor
+                ];
+                super(20000, canvas_element, att[i], options);
+            }
+        }
+
+        options = {
+            beta: 0.2
+        };
+        
+        if( Math.random() < 0.5 )
+        {
+            options.beta = 0.1;
+            options.attractors = [
+                    {
+                        pull: 0.2,
+                        kick: 0.04
+                    }
+                ];
+        }
+        let q = new Dueling(document.getElementById("canvas"), options);
+        q.start();
     </script>
 </body>
 </html>

@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../common.css">
+    <script src="../gpu-browser.js"></script>
+    <script src="../drift.js"></script>
+    <script src="../canvas.js"></script>
+    <script src="attractor_base.js"></script>
+    <script src="attractors.js"></script>
+    <script src="animations.js"></script>
+    
+</head>
+
+<body class="noscroll">
+    
+    <canvas id="canvas"></canvas>
+    <script>
+        class Dueling extends DuelingAttractorsAnimation
+        {
+            constructor(canvas_element, options)
+            {
+                super(20000, canvas_element, DeJongAttractor, options);
+            }
+        }
+        
+        let q = new Dueling(document.getElementById("canvas"),
+            {
+                mix: 0.02,
+                beta: 0.2,
+                dt: 0.03,
+                share: 0.5,
+                attractors: [
+                    {
+                        pull: 0.2,
+                        kick: 0.04
+                    }
+                ]
+            }
+        );
+        q.start();
+    </script>
+</body>
+</html>
