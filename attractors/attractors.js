@@ -238,7 +238,7 @@ class BExpAttractor__ extends BaseAttractor
     }
 }
 
-class BExpAttractor extends BaseAttractor
+class HyperAttractor extends BaseAttractor
 {
     constructor(np, options)
     {

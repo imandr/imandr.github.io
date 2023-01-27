@@ -21,7 +21,7 @@
             {
                 const i = Math.floor(Math.random() * 4);
                 const att = [
-                    DeJongAttractor, QExpAttractor, CubicAttractor, TanhAttractor, BExpAttractor
+                    DeJongAttractor, QExpAttractor, CubicAttractor, TanhAttractor, HyperAttractor
                 ];
                 super(20000, canvas_element, att[i], options);
             }
@@ -39,6 +39,14 @@
                         pull: 0.2,
                         kick: 0.02
                     }
+                ];
+        }
+        else if( Math.random() < 0.33 )
+        {
+            options.beta = 0.01;
+            options.attractors = [
+                    {   pull: 0.9   },
+                    {   pull: 1.1   }
                 ];
         }
         let q = new Dueling(document.getElementById("canvas"), options);
