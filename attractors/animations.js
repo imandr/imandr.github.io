@@ -12,7 +12,7 @@ class SingleAttractorAnimation
         const h = window.innerHeight;
         const xmin = this.D.XMin;
         const xmax = this.D.XMax;
-        this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
+        this.C = new Canvas2(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
         this.ClearColor = [0,0,0];
         const qexp = this;
         window.onresize = function() {
@@ -98,7 +98,7 @@ class DuelingAttractorsAnimation
         const h = window.innerHeight;
         const xmin = this.D1.XMin;
         const xmax = this.D1.XMax;
-        this.C = new Canvas(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
+        this.C = new Canvas2(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
         this.C.resize(w-this.margin*2, h-this.margin*2);
         this.ClearColor = [0,0,0];
 

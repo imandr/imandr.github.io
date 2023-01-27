@@ -187,3 +187,53 @@ class QExpAttractor extends BaseAttractor
         );
     }
 }
+
+class BExpAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        const P = 1.5;
+        const R = 3.0;
+        super(np, 
+            [1.0, 0.3, -P, 0.3, 1.0, 0.3, -P, 0.3], 
+            [1.0, P, P, P, 1.0, P, P, P],
+            [-R, -R], 
+            [R, R], 
+            options.kick == null ? 0.01 : options.kick, 
+            options.pull == null ? 1.0 : options.pull,
+        );
+
+        function G(x)
+        {
+            return 2.0/Math.cosh(2*x)-1;
+        }
+    
+        function F(x)
+        {
+            return -Math.sinh(2*x)/(Math.cosh(2*x)*Math.cosh(2*x));
+        }
+    
+        this.GPU.addFunction(G);
+        this.GPU.addFunction(F);
+        this.transform_kernel = this.GPU.createKernel(
+            function(points, params)
+            {
+                const A = params[0];
+                const B = params[1];
+                const C = params[2];
+                const D = params[3];
+                const P = params[4];
+                const Q = params[5];
+                const R = params[6];
+                const S = params[7];
+                const x = points[this.thread.x][0];
+                const y = points[this.thread.x][1];
+                return [
+                        F(B*x) + C*G(D*y),
+                        F(Q*y) + R*G(S*x)
+                    ];
+            },
+            { output: [this.NP] }
+        );
+    }
+}
