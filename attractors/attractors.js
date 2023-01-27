@@ -242,10 +242,10 @@ class BExpAttractor extends BaseAttractor
 {
     constructor(np, options)
     {
-        const P = 2.5;
+        const P = 3.0;
         const R = 3.5;
         super(np, 
-            [0.3, -P, 0.1, 0.3, -P, 0.1], 
+            [-P, 0.3, 0.3, -P, 0.3, 0.3], 
             [P, P, P, P, P, P],
             [-R, -R], 
             [R, R], 
@@ -283,8 +283,8 @@ class BExpAttractor extends BaseAttractor
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
                 return [
-                        F(A*x) + B*G(C*y),
-                        F(P*y) + Q*G(R*x)
+                        G(A*x) + B*F(C*y),
+                        G(P*y) + Q*F(R*x)
                     ];
             },
             { output: [this.NP] }
