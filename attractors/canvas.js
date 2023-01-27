@@ -209,6 +209,7 @@ class Canvas2
         this.CY = (y0 + x1)/2;
         this.CleanInterval = 100;
         this.Beta = 0.01;
+        this.FirstUpdate = true;
         this.Margin = 0.38;
         this.DimX = dimx;
         this.DimY = dimy;
@@ -248,6 +249,7 @@ class Canvas2
             var xmin = points[0][0],
                 ymin = points[0][1];
             var xmax = xmin, ymax = ymin;
+            var beta = this.FirstUpdate ? 1.0 : this.Beta;
             for( const point of points )
             {
                 const x = point[0];
@@ -262,10 +264,12 @@ class Canvas2
             const scale_target = (scale_x < scale_y ? scale_x : scale_y)/(1.0 + this.Margin);
             const cx_target = (xmax+xmin)/2;
             const cy_target = (ymax+ymin)/2;
-            const beta = this.Scale > scale_target ? this.Beta : this.Beta/2; 
+            if ( !this.FirstUpdate && this.Scale < scale_target )
+                beta = beta/2;
             this.Scale += beta*(scale_target - this.Scale);
-            this.CX += this.Beta*(cx_target - this.CX);
-            this.CY += this.Beta*(cy_target - this.CY);
+            this.CX += beta*(cx_target - this.CX);
+            this.CY += beta*(cy_target - this.CY);
+            this.FirstUpdate = false;
         }
     }
 
