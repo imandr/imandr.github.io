@@ -90,7 +90,7 @@ class Canvas
                 const g = bitmap[i+1];
                 const b = bitmap[i+2];
                 const v = r + g + b;
-                if( v > 0 && v <= 9 )
+                if( v > 0 && v <= 10 )
                     bitmap[i] = bitmap[i+1] = bitmap[i+2] = 0;
             }
         
@@ -234,8 +234,12 @@ class Canvas2
                 const g = bitmap[i+1];
                 const b = bitmap[i+2];
                 const v = r + g + b;
-                if( v > 0 && v <= 6 )
-                    bitmap[i] = bitmap[i+1] = bitmap[i+2] = 0;
+                if( v > 0 && v < 50 )
+                {
+                    bitmap[i] = Math.floor(bitmap[i] * 0.9);
+                    bitmap[i+1] = Math.floor(bitmap[i+1] * 0.9);
+                    bitmap[i+2] = Math.floor(bitmap[i+2] * 0.9);
+                }
             }
         
             this.Ctx.putImageData(image, 0, 0);
