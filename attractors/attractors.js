@@ -188,7 +188,7 @@ class QExpAttractor extends BaseAttractor
     }
 }
 
-class BExpAttractor extends BaseAttractor
+class BExpAttractor__ extends BaseAttractor
 {
     constructor(np, options)
     {
@@ -231,6 +231,60 @@ class BExpAttractor extends BaseAttractor
                 return [
                         F(B*x) + C*G(D*y),
                         F(Q*y) + R*G(S*x)
+                    ];
+            },
+            { output: [this.NP] }
+        );
+    }
+}
+
+class HyperAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        const P = 3.0;
+        const R = 3.5;
+        super(np, 
+            [-P, 0.3, 0.3, -P, 0.3, 0.3], 
+            [P, P, P, P, P, P],
+            [-R, -R], 
+            [R, R], 
+            options.kick == null ? 0.01 : options.kick, 
+            options.pull == null ? 1.0 : options.pull,
+        );
+
+        function G(x)
+        {
+            return 2.0/Math.cosh(2*x)-1;
+        }
+    
+        function F(x)
+        {
+            return Math.tanh(2*x)/Math.cosh(2*x);
+        }
+    
+        function H(x)
+        {
+            return (2.0/Math.cosh(2*x)-1)/Math.cosh(2*x);
+        }
+    
+        this.GPU.addFunction(G);
+        this.GPU.addFunction(F);
+        this.GPU.addFunction(H);
+        this.transform_kernel = this.GPU.createKernel(
+            function(points, params)
+            {
+                const A = params[0];
+                const B = params[1];
+                const C = params[2];
+                const P = params[3];
+                const Q = params[4];
+                const R = params[5];
+                const x = points[this.thread.x][0];
+                const y = points[this.thread.x][1];
+                return [
+                        G(A*x) + B*F(C*y),
+                        G(P*y) + Q*F(R*x)
                     ];
             },
             { output: [this.NP] }
