@@ -41,8 +41,8 @@ class SingleAttractorAnimation
         const c = this.Colors.next_color();
         const params = this.PMorpher.step(this.DT);
         const points = this.D.step(params);
-        this.C.clear(this.ClearColor, 0.2);
-        this.C.points(points, c, 0.2);
+        this.C.clear(this.ClearColor, 0.1);
+        this.C.points(points, c, 0.1);
         this.C.render();
     }
 
@@ -169,18 +169,18 @@ class DuelingAttractorsAnimation
     
         var points1 = this.D1.step(p1);
         var points2 = this.D2.step(p2);
-        this.C.clear(this.ClearColor, 0.3);
+        this.C.clear(this.ClearColor, 0.1);
         var s1 = share;
         var s2 = 1-share;
         if( s1 > s2 )
         {
-            s2 = s2/s1 * 0.4;
-            s1 = 0.4;
+            s2 = s2/s1 * 0.2;
+            s1 = 0.2;
         }
         else
         {
-            s1 = s1/s2 * 0.4;
-            s2 = 0.4;
+            s1 = s1/s2 * 0.2;
+            s2 = 0.2;
         }
         this.C.points(points1, c1, s1);
         this.C.points(points2, c2, s2);

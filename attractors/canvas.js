@@ -90,7 +90,7 @@ class Canvas
                 const g = bitmap[i+1];
                 const b = bitmap[i+2];
                 const v = r + g + b;
-                if( v > 0 && v <= 6 )
+                if( v > 0 && v <= 9 )
                     bitmap[i] = bitmap[i+1] = bitmap[i+2] = 0;
             }
         
