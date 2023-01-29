@@ -36,7 +36,6 @@
             options.beta = 0.2;
             options.attractors = [
                     {
-                        pull: 0.2,
                         kick: 0.02
                     }
                 ];
@@ -44,10 +43,6 @@
         else if( Math.random() < 0.33 )
         {
             options.beta = 0.01;
-            options.attractors = [
-                    {   pull: 0.9   },
-                    {   pull: 1.1   }
-                ];
         }
         let q = new Dueling(document.getElementById("canvas"), options);
         q.start();

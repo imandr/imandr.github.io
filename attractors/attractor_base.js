@@ -1,6 +1,6 @@
 class BaseAttractor
 {
-    constructor(np, pmin, pmax, xmin, xmax, kick, pull)
+    constructor(np, pmin, pmax, xmin, xmax, kick, pull, nvisible)
     {
         this.Rate = 0.02;
         this.PMin = pmin;
@@ -20,7 +20,7 @@ class BaseAttractor
         this.Points = [];
         this.GPU = new GPU();           //{mode:"cpu"});
         this.transform_kernel = null;
-        
+        this.NVisible = nvisible == null ? this.XDim : nvisible;
         this.normal = function()
         {
             return Math.random() + Math.random() + Math.random() + Math.random()
@@ -29,8 +29,19 @@ class BaseAttractor
                 - 6.0;
         }
 
+        this.extract_visible = this.GPU.createKernel(
+            function(points, n)
+            {
+                if( n == 2 )
+                    return [points[this.thread.x][0], points[this.thread.x][1]];
+                else
+                    return [points[this.thread.x][0], points[this.thread.x][1], points[this.thread.x][2]];
+            },
+            { output: [this.NP] }
+        );
+
         this.pull_kernel = this.GPU.createKernel(
-            function(points0, points1, pull)
+            function(points0, points1, pull, n)
             {
                 const x0 = points0[this.thread.x][0];
                 const y0 = points0[this.thread.x][1];
@@ -48,9 +59,8 @@ class BaseAttractor
         {
             var points1 = this.transform_kernel(points, params);
             if( pull != 1.0 )
-                return this.pull_kernel(points, points1, pull);
-            else
-                return points1;
+                points1 = this.pull_kernel(points, points1, pull, this.XDim);
+            return points1;
         }
 
         this.random_point_uniform = function()
