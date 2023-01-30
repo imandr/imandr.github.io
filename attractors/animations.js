@@ -251,9 +251,9 @@ class DuelingAttractorsAnimation
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
         this.Colors1 = new ColorChanger();
         this.Colors2 = new ColorChanger();
-        this.SBPM = new Morpher([0.2, 0.1, 0.7], [0.8, 0.3, 1.3]);
+        this.SBPM = new Morpher([0.2, 0.01, 0.9], [0.8, 0.03, 1.1]);
     
-        this.DT = options.dt == null ? 0.02 : options.dt;
+        this.DT = options.dt == null ? 0.01 : options.dt;
         this.Mix = options.mix == null ? 0.01 : options.mix;
         this.Share = options.share;
         this.Beta = options.beta;

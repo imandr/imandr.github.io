@@ -215,7 +215,7 @@ class HyperAttractor extends BaseAttractor
     
         function H(x)
         {
-            return (2.0/Math.cosh(2*x)-1)/Math.cosh(2*x);
+            return (2.0/Math.cosh(10*x)-1)/Math.cosh(x);
         }
     
         this.GPU.addFunction(G);
@@ -235,104 +235,6 @@ class HyperAttractor extends BaseAttractor
                 return [
                         G(A*x) + B*F(C*y),
                         G(P*y) + Q*F(R*x)
-                    ];
-            },
-            { output: [this.NP] }
-        );
-    }
-}
-
-class Hyper3Attractor extends BaseAttractor
-{
-    constructor(np, options)
-    {
-        const P = 3.0;
-        const R = 3.5;
-        super(np, 
-            [-P, 0.3, 0.3, -P, 0.3, 0.3, -P, 0.3, 0.3], 
-            [P, P, P, P, P, P, P, P, P],
-            [-R, -R, -R], 
-            [R, R, -R], 
-            options.kick == null ? 0.01 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
-            2
-        );
-
-        function G(x)
-        {
-            return 2.0/Math.cosh(2*x)-1;
-        }
-    
-        function F(x)
-        {
-            return Math.tanh(2*x)/Math.cosh(2*x);
-        }
-    
-        function H(x)
-        {
-            return (2.0/Math.cosh(2*x)-1)/Math.cosh(2*x);
-        }
-    
-        this.GPU.addFunction(G);
-        this.GPU.addFunction(F);
-        this.GPU.addFunction(H);
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const P = params[3];
-                const Q = params[4];
-                const R = params[5];
-                const L = params[6];
-                const M = params[7];
-                const N = params[8];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const z = points[this.thread.x][2];
-                return [
-                        G(A*x) + B*F(C*y),
-                        G(P*y) + Q*F(R*z),
-                        G(L*z) + M*F(N*x)
-                    ];
-            },
-            { output: [this.NP] }
-        );
-    }
-}
-class DeJong3Attractor extends BaseAttractor
-{
-    constructor(np, options)
-    {
-        const P = 2.5;
-        const R = 3.5;
-        super(np, 
-            [-P, -P, -P, -P, -P, -P], 
-            [P, P, P, P, P, P],
-            [-R, -R, -R], 
-            [R, R, -R], 
-            options.kick == null ? 0.01 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
-            2
-        );
-
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const E = params[4];
-                const F = params[5];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const z = points[this.thread.x][2];
-                return [
-                        Math.sin(A*y) - Math.cos(D*x),
-                        Math.sin(B*z) - Math.cos(E*y),
-                        Math.sin(C*x) - Math.cos(F*z)
                     ];
             },
             { output: [this.NP] }

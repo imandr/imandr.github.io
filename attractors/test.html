@@ -19,19 +19,19 @@
         {
             constructor(canvas_element, options)
             {
-                super(50000, canvas_element, QExpAttractor, options);
+                super(50000, canvas_element, HyperAttractor, options);
             }
         }
         class Dual extends DuelingAttractorsAnimation
         {
             constructor(canvas_element, options)
             {
-                super(50000, canvas_element, CubicAttractor, options);
+                super(50000, canvas_element, HyperAttractor, options);
             }
         }
         const options = {
             beta: 0.05,
-            dt: 0.05,
+            dt: 0.02,
             mix:0.01
         }
         let q = new Dual(document.getElementById("canvas"), options);
