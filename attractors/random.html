@@ -5,7 +5,6 @@
     <script src="gpu-browser.js"></script>
     <script src="drift.js"></script>
     <script src="canvas.js"></script>
-    <script src="attractor_base.js"></script>
     <script src="attractors.js"></script>
     <script src="animations.js"></script>
     
@@ -19,11 +18,10 @@
         {
             constructor(canvas_element, options)
             {
-                const i = Math.floor(Math.random() * 4);
-                const att = [
-                    DeJongAttractor, QExpAttractor, CubicAttractor, TanhAttractor, HyperAttractor
-                ];
-                super(20000, canvas_element, att[i], options);
+                const n = Attractors.all.length;
+                const i = Math.floor(Math.random() * n);
+                const att = Attractors.all[i];
+                super(20000, canvas_element, att, options);
             }
         }
 

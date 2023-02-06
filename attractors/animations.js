@@ -77,7 +77,7 @@ class SingleAttractorAnimation
     }
 }
 
-class DuelingAttractorsAnimation__
+class DuelingAttractorsAnimation
 {
     constructor(np, canvas_element, attractor_class, options)
     {
@@ -88,6 +88,9 @@ class DuelingAttractorsAnimation__
         this.NP = 40000;
         this.D1 = new attractor_class(this.NP, att1_options);
         this.D2 = new attractor_class(this.NP, att2_options);
+        this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
+        this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
+        this.SBM = new Morpher([0.2, 0.05], [0.8, 0.2]);
         this.DT = options.dt == null ? 0.02 : options.dt;
         this.Mix = options.mix == null ? 0.01 : options.mix;
         this.Share = options.share;
@@ -116,10 +119,6 @@ class DuelingAttractorsAnimation__
         this.C.clear(this.ClearColor, 1.0);
         //var D = new DeJong(-1.24, 1.43, -1.65, -1.43);
     
-    
-        this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
-        this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
-    
         this.params12 = function(dt, m1, m2, beta)
         {
             var p1 = m1.step(dt);
@@ -132,15 +131,25 @@ class DuelingAttractorsAnimation__
             return [p1_1, p2];
         }
     
-        this.SBM = new Morpher([0.2, 0.1], [0.8, 0.3]);
-        const sb = this.SBM.step(0.03);
-    
+        this.beta_share = function()
+        {
+            const sb = this.SBM.step(0.03);
+            const share = this.Share == null ? sb[0] : this.Share;
+            const beta = this.Beta == null ? sb[1] : this.Beta;
+            return {
+                share: share,
+                beta: beta
+            }
+        }
+        
+        const sb = this.beta_share()
+        const beta = sb.beta
     
         //var D = new DeJong(0,0,0,0);
         this.Colors1 = new ColorChanger();
         this.Colors2 = new ColorChanger();
 
-        const p12 = this.params12(this.DT, this.M1, this.M2, sb[1]);
+        const p12 = this.params12(this.DT, this.M1, this.M2, beta);
         const p1 = p12[0], p2 = p12[1];
 
         const Skip = 30;
@@ -157,9 +166,9 @@ class DuelingAttractorsAnimation__
         var c2 = this.Colors2.next_color();
         for( let i = 0; i < 3; i++ )
             c2[i] = (c2[i] + c1[i])/2;
-        const sb = this.SBM.step(0.03);
-        const share = this.Share == null ? sb[0] : this.Share;
-        const beta = this.Beta == null ? sb[1] : this.Beta;
+        const sb = this.beta_share()
+        const beta = sb.beta
+        const share = sb.share;
     
         const p12 = this.params12(this.DT, this.M1, this.M2, beta);
         const p1 = p12[0];
@@ -235,7 +244,7 @@ class DuelingAttractorsAnimation__
     };   
 }
 
-class DuelingAttractorsAnimation
+class DuelingAttractorsAnimation__
 {
     constructor(np, canvas_element, attractor_class, options)
     {
