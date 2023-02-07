@@ -233,7 +233,7 @@ class TanhAttractor extends BaseAttractor
     }
 };
 
-class QExpAttractor extends BaseAttractor
+class QExpAttractor___ extends BaseAttractor
 {
     constructor(np, options)
     {
@@ -275,6 +275,66 @@ class QExpAttractor extends BaseAttractor
                 const y = points[this.thread.x][1];
                 const x1 = F(A*x) + H(B*y);
                 const y1 = F(C*y) + H(D*x);
+                if( pull == 1 && blur == 0 )
+                    return [x1, y1];
+                else
+                {
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
+            },
+            { output: [this.NP] }
+        );
+    }
+};
+
+class QExpAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        const P = 1.0;
+        const R = 3.0;
+        
+        var pmin = [], pmax = [];
+        const nparams = 16;
+        for( let i = 0; i < nparams; i++ )
+        {
+            pmin.push(-P);
+            pmax.push(P);
+        }
+        
+        super(np, pmin, pmax, [-R, -R], 
+            [R, R], options);
+
+        function F(x, a, b)
+        {
+            return (a*x*x + 7*b*x)/Math.cosh(2*x);
+        }
+
+        function G(x, a, b)
+        {
+            return (7*a*x + b)/Math.cosh(2*x);
+        }
+
+        this.GPU.addFunction(F);
+        this.GPU.addFunction(G);
+
+        this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
+            {
+                const A = params[0];
+                const B = params[1];
+                const C = params[2];
+                const D = params[3];
+                const P = params[4];
+                const Q = params[5];
+                const R = params[6];
+                const S = params[7];
+                const x = points[this.thread.x][0];
+                const y = points[this.thread.x][1];
+                const x1 = F(x, A, B) + G(y, P, Q);
+                const y1 = F(y, C, D) + G(x, R, S);
                 if( pull == 1 && blur == 0 )
                     return [x1, y1];
                 else
