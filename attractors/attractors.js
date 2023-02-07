@@ -1,6 +1,6 @@
 class BaseAttractor
 {
-    constructor(np, pmin, pmax, xmin, xmax, kick, pull, nvisible)
+    constructor(np, pmin, pmax, xmin, xmax, options)
     {
         this.Rate = 0.02;
         this.PMin = pmin;
@@ -15,12 +15,17 @@ class BaseAttractor
             throw new Error("Dimensions of xmin and xmax differ");
         this.XDim = xmin.length;
         this.NP = np;
-        this.Kick = kick == null ? 0.01 : kick;
-        this.Pull = pull == null ? 1.0 : pull;
+        if( options == null )
+            options = {}
+        this.Kick = options.kick == null ? 0.01 : options.kick;
+        this.Pull = options.pull == null ? 1.0 : options.pull;
+        this.Blur = options.blur == null ? 0.0 : options.blur;
         this.Points = [];
-        this.GPU = new GPU();           //{mode:"cpu"});
+        this.GPU = new GPU();       //{mode:"cpu"});
+        this.GPU = new GPU({mode:"cpu"});
         this.transform_kernel = null;
-        this.NVisible = nvisible == null ? this.XDim : nvisible;
+        this.transform_with_pull_kernel = null;
+
         this.normal = function()
         {
             return Math.random() + Math.random() + Math.random() + Math.random()
@@ -29,37 +34,13 @@ class BaseAttractor
                 - 6.0;
         }
 
-        this.extract_visible = this.GPU.createKernel(
-            function(points, n)
-            {
-                if( n == 2 )
-                    return [points[this.thread.x][0], points[this.thread.x][1]];
-                else
-                    return [points[this.thread.x][0], points[this.thread.x][1], points[this.thread.x][2]];
-            },
-            { output: [this.NP] }
-        );
-
-        this.pull_kernel = this.GPU.createKernel(
-            function(points0, points1, pull, n)
-            {
-                const x0 = points0[this.thread.x][0];
-                const y0 = points0[this.thread.x][1];
-                const x1 = points1[this.thread.x][0];
-                const y1 = points1[this.thread.x][1];
-                return [
-                        x0 + pull * (x1 - x0),
-                        y0 + pull * (y1 - y0)
-                    ];
-            },
-            { output: [this.NP] }
-        );
-
-        this.transform = function(points, params, pull)
+        this.transform = function(points, params, pull, blur)
         {
+            if( this.transform_with_pull_kernel != null )
+                return this.transform_with_pull_kernel(points, params, pull, blur);
             var points1 = this.transform_kernel(points, params);
-            if( pull != 1.0 )
-                points1 = this.pull_kernel(points, points1, pull, this.XDim);
+            if( pull != 1.0 || blur != 0.0 )
+                points1 = this.pull_kernel(points, points1, pull, blur);
             return points1;
         }
 
@@ -95,10 +76,11 @@ class BaseAttractor
                 {
                     this.Points[i] = this.random_point()
                 }
-        var points1 = this.transform(this.Points, params, this.Pull);
+        var points1 = this.transform(this.Points, params, this.Pull, this.Blur);
         this.Points = points1;
         return this.Points;
     }
+    
 };
 
 class DeJongAttractor extends BaseAttractor
@@ -108,14 +90,12 @@ class DeJongAttractor extends BaseAttractor
         const P = 2.5;
         const R = 2.5;
         super(np, [-P, -P, -P, -P], [P, P, P, P],
-            [-R, -R], [R, R], 
-            options.kick == null ? 0.02 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
-        );
+            [-R, -R], [R, R], options);
 
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params, pull)
+        this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
             {
+                //debugger;
                 const A = params[0];
                 const B = params[1];
                 const C = params[2];
@@ -124,57 +104,17 @@ class DeJongAttractor extends BaseAttractor
                 const y = points[this.thread.x][1];
                 const x1 = Math.sin(A*y) - Math.cos(B*x);
                 const y1 = Math.sin(C*x) - Math.cos(D*y);
-                if( pull != 1.0 )
+                if( pull == 1 && blur == 0 )
                     return [x1, y1];
                 else
-                    return [x + (x1-x)*pull, y + (y1-y)*pull];
+                {
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
             },
             { output: [np] }
         );
-
-        this.transform = function(points, params, pull)
-        {
-            var points1 = this.transform_kernel(points, params, this.Pull);
-            return points1;
-        }
-    }
-};
-
-class TracedDeJongAttractor extends BaseAttractor
-{
-    constructor(np, options)
-    {
-        const P = 2.5;
-        const R = 2.5;
-        super(np, [-P, -P, -P, -P], [P, P, P, P],
-            [-R, -R], [R, R], 
-            options.kick == null ? 0.01 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
-        );
-        this.Trace = options.trace == null ? 0.0 : options.trace;
-
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params, trace)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const t = 1.0 - (1 - Math.pow(Math.random(), 1.0/5))*trace;
-                const x1 = Math.sin(A*y) - Math.cos(B*x);
-                const y1 = Math.sin(C*x) - Math.cos(D*y);
-                return [ x + (x1-x)*t, y + (y1-y)*t ]; 
-            },
-            { output: [np] }
-        );
-
-        this.transform = function(points, params, pull)
-        {
-            var points1 = this.transform_kernel(points, params, this.Trace);
-            return points1;
-        }
     }
 };
 
@@ -188,9 +128,7 @@ class CubicAttractor extends BaseAttractor
             [-P, -P, -P, -P], 
             [P, P, P, P],
             [-R, -R], 
-            [R, R], 
-            options.kick == null ? 0.01 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
+            [R, R], options
         );
 
         function G(x)
@@ -212,8 +150,8 @@ class CubicAttractor extends BaseAttractor
         this.GPU.addFunction(F);
         this.GPU.addFunction(H);
 
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params)
+        this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
             {
                 const A = params[0];
                 const B = params[1];
@@ -221,10 +159,16 @@ class CubicAttractor extends BaseAttractor
                 const D = params[3];
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
-                return [
-                    F(A*x) + H(B*y), 
-                    F(C*y) + H(D*x)
-                ];
+                const x1 = F(A*x) + H(B*y);
+                const y1 = F(C*y) + H(D*x);
+                if( pull == 1 && blur == 0 )
+                    return [x1, y1];
+                else
+                {
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
             },
             { output: [this.NP] }
         );
@@ -241,9 +185,7 @@ class TanhAttractor extends BaseAttractor
             [-P, -P, 0.2, 0.2], 
             [P, P, P, P],
             [-R, -R], 
-            [R, R], 
-            options.kick == null ? 0.01 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
+            [R, R], options
         );
 
         function F(x)
@@ -264,21 +206,27 @@ class TanhAttractor extends BaseAttractor
         this.GPU.addFunction(G);
         this.GPU.addFunction(F);
         this.GPU.addFunction(H);
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params)
+        this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
             {
                 const A = params[0];
                 const B = params[1];
                 const C = params[2];
                 const D = params[3];
-                const E = params[4];
-                const F = params[5];
+                //const E = params[4];
+                //const F = params[5];
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
-                return [
-                        A*this.H(x) + B*this.G(y) + E*this.F(y),
-                        C*this.H(y) + D*this.G(x) + F*this.F(x)
-                    ];
+                const x1 = A*H(x) + B*G(y); // + E*F(y);
+                const y1 = C*H(y) + D*G(x); // + F*F(x);
+                if( pull == 1 && blur == 0 )
+                    return [x1, y1];
+                else
+                {
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
             },
             { output: [this.NP] }
         );
@@ -295,10 +243,7 @@ class QExpAttractor extends BaseAttractor
             [-P, -P, 0.2, 0.2], 
             [P, P, P, P],
             [-R, -R], 
-            [R, R], 
-            options.kick == null ? 0.01 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
-        );
+            [R, R], options);
 
         function G(x)
         {
@@ -318,8 +263,9 @@ class QExpAttractor extends BaseAttractor
         this.GPU.addFunction(G);
         this.GPU.addFunction(F);
         this.GPU.addFunction(H);
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params)
+
+        this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
             {
                 const A = params[0];
                 const B = params[1];
@@ -327,10 +273,16 @@ class QExpAttractor extends BaseAttractor
                 const D = params[3];
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
-                return [
-                        F(A*x) + H(B*y),
-                        F(C*y) + H(D*x)
-                    ];
+                const x1 = F(A*x) + H(B*y);
+                const y1 = F(C*y) + H(D*x);
+                if( pull == 1 && blur == 0 )
+                    return [x1, y1];
+                else
+                {
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
             },
             { output: [this.NP] }
         );
@@ -347,10 +299,7 @@ class HyperAttractor extends BaseAttractor
             [-P, 0.3, 0.3, -P, 0.3, 0.3], 
             [P, P, P, P, P, P],
             [-R, -R], 
-            [R, R], 
-            options.kick == null ? 0.01 : options.kick, 
-            options.pull == null ? 1.0 : options.pull,
-        );
+            [R, R], options);
 
         function G(x)
         {
@@ -370,8 +319,9 @@ class HyperAttractor extends BaseAttractor
         this.GPU.addFunction(G);
         this.GPU.addFunction(F);
         this.GPU.addFunction(H);
-        this.transform_kernel = this.GPU.createKernel(
-            function(points, params)
+
+        this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
             {
                 const A = params[0];
                 const B = params[1];
@@ -381,17 +331,24 @@ class HyperAttractor extends BaseAttractor
                 const R = params[5];
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
-                return [
-                        G(A*x) + B*F(C*y),
-                        G(P*y) + Q*F(R*x)
-                    ];
+                const x1 = G(A*x) + B*F(C*y);
+                const y1 = G(P*y) + Q*F(R*x);
+                if( pull == 1 && blur == 0 )
+                    return [x1, y1];
+                else
+                {
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
             },
             { output: [this.NP] }
         );
+
     }
 };
 
 var Attractors = {
-    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, TracedDeJongAttractor,
+    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor,
     all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor]
 }

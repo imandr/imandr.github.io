@@ -42,7 +42,7 @@ class SingleAttractorAnimation
         const params = this.PMorpher.step(this.DT);
         const points = this.D.step(params);
         this.C.clear(this.ClearColor, 0.05);
-        this.C.points(points, c, 0.05);
+        this.C.points(points, c, 0.1);
         this.C.render();
     }
 
@@ -83,11 +83,11 @@ class DuelingAttractorsAnimation
     {
         if( options == null )
             options = {};
-        const att1_options = options.attractors == null || options.attractors[0] == null ? {} : options.attractors[0];
-        const att2_options = options.attractors == null || options.attractors[1] == null ? {} : options.attractors[1];
+        const options1 = Object.assign({}, options, options.attractors == null || options.attractors[0] == null ? {} : options.attractors[0]);
+        const options2 = Object.assign({}, options, options.attractors == null || options.attractors[1] == null ? {} : options.attractors[1]);
         this.NP = 40000;
-        this.D1 = new attractor_class(this.NP, att1_options);
-        this.D2 = new attractor_class(this.NP, att2_options);
+        this.D1 = new attractor_class(this.NP, options1);
+        this.D2 = new attractor_class(this.NP, options2);
         this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
         this.SBM = new Morpher([0.2, 0.05], [0.8, 0.2]);
