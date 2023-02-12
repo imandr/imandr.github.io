@@ -208,7 +208,7 @@ class Canvas2
         this.CX = (x0 + y1)/2;
         this.CY = (y0 + x1)/2;
         this.CleanInterval = 100;
-        this.Beta = 0.01;
+        this.Beta = 0.001;
         this.FirstUpdate = true;
         this.Margin = 0.38;
         this.DimX = dimx;
@@ -282,12 +282,29 @@ class Canvas2
         // color is list of 3 floats from 0 to 1
         this.Ctx.globalAlpha = alpha;
         this.Ctx.fillStyle = 'rgb(' + Math.floor(color[0]*256) + ',' +  Math.floor(color[1]*256) + ',' +  Math.floor(color[2]*256) + ')';
+        this.Ctx.strokeStyle = 'rgb(200, 200, 200)';
         var sx = 0.0;
         var sy = 0.0;
 
         this.update(points);
 
         var mapped = this.Mapper.map(points, this.Scale, this.CX, this.CY, this.DimX, this.DimY);
+        
+        var p;
+        var xmin = mapped[0][0],
+            ymin = mapped[0][1];
+        var xmax = xmin, ymax = ymin;
+        
+        if( false )
+            for( p of mapped )
+            {
+                const x = p[0];
+                const y = p[1];
+                if( x < xmin )  xmin = x;
+                else if( x > xmax ) xmax = x;
+                if( y < ymin )  ymin = y;
+                else if( y > ymax ) ymax = y;
+            }
 
         for( let p of mapped )
         {        
@@ -298,6 +315,7 @@ class Canvas2
             else
                 this.Ctx.fillRect(ix, iy-1, 0.7, 1.7);
         }
+
         if( --this.NextClean <= 0 )
             this.clean();
     }

@@ -25,22 +25,29 @@
             }
         }
 
-        options = {
+        var options = {
             dt: 0.02,
             beta: 0.2,
             blur: 0.003
         };
         
-        if( Math.random() < 0.5 )
+        if( Math.random() < 0.33 )
         {
-            options.beta = 0.1;
+            options.beta = 0.01;
             options.attractors = [
                     {
-                        kick: 0.03,
+                        kick: 0.01,
                         pull: 0.3,
                         blur: 0
                     }
                 ];
+        }
+        else if( Math.random() < 0.5 )
+        {
+            options.beta = 0.9;
+            options.mix = 0.3;
+            options.kick = 0.001;
+            options.blur = 0;
         }
         let q = new Dueling(document.getElementById("canvas"), options);
         q.start();
