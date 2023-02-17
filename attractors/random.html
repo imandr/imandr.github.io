@@ -28,15 +28,16 @@
         var options = {
             dt: 0.03,
             beta: 0.2,
-            blur: 0.003
+            blur: 0.003,
+			kick: 0.002
         };
         
-        if( Math.random() < 0.33 )
+        if( Math.random() < 0.1 )
         {
             options.beta = 0.01;
             options.attractors = [
                     {
-                        kick: 0.01,
+                        kick: 0.002,
                         pull: 0.3,
                         blur: 0
                     }

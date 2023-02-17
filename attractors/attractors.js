@@ -450,8 +450,10 @@ class MandelbrotAttractor extends BaseAttractor
         const P = 1.0;
         const R = 3.5;
         super(np, 
-            [0.3, 0.0], 
-            [0.8, 0.5],
+            //[0.3, 0.0], 
+            //[0.8, 0.5],
+            [-1.0, -1.0], 
+            [1.5, 1.5],
             [-1, -1], 
             [1, 1], options);
 
@@ -463,8 +465,11 @@ class MandelbrotAttractor extends BaseAttractor
                 const x = points[this.thread.x][0];
                 const y = points[this.thread.x][1];
 
-                const x1 = Math.tanh((x+a)*(x+a) - (y+b)*(y+b));
-                const y1 = Math.tanh(2*(x+a)*(y+b));
+                const x_ = (x+a)*(x+a) - (y+b)*(y+b);
+                const y_ = 2*(x+a)*(y+b);
+				const r = Math.cosh(Math.sqrt(x_*x_ + y_*y_)/1.5);
+				const x1 = x_/r;
+				const y1 = y_/r;
                 
                 if( pull == 1 && blur == 0 )
                     return [x1, y1];
@@ -483,5 +488,5 @@ class MandelbrotAttractor extends BaseAttractor
 
 var Attractors = {
     DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, MandelbrotAttractor,
-    all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor]
+    all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, MandelbrotAttractor]
 }
