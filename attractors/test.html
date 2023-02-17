@@ -18,14 +18,14 @@
         {
             constructor(canvas_element, options)
             {
-                super(30000, canvas_element, Attractors.DeJongModAttractor, options);
+                super(30000, canvas_element, Attractors.MandelbrotAttractor, options);
             }
         }
         class Dual extends DuelingAttractorsAnimation
         {
             constructor(canvas_element, options)
             {
-                super(15000, canvas_element, [Attractors.DeJongModAttractor, Attractors.DeJongModAttractor], options);
+                super(15000, canvas_element, [Attractors.MandelbrotAttractor, Attractors.MandelbrotAttractor], options);
             }
         }
         const options = {

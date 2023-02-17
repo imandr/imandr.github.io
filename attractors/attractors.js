@@ -443,7 +443,45 @@ class HyperAttractor extends BaseAttractor
     }
 };
 
+class MandelbrotAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        const P = 1.0;
+        const R = 3.5;
+        super(np, 
+            [0.3, 0.0], 
+            [0.8, 0.5],
+            [-1, -1], 
+            [1, 1], options);
+
+            this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
+            {
+                const a = params[0];
+                const b = params[1];
+                const x = points[this.thread.x][0];
+                const y = points[this.thread.x][1];
+
+                const x1 = Math.tanh((x+a)*(x+a) - (y+b)*(y+b));
+                const y1 = Math.tanh(2*(x+a)*(y+b));
+                
+                if( pull == 1 && blur == 0 )
+                    return [x1, y1];
+                else
+                {
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
+            },
+            { output: [this.NP] }
+        );
+
+    }
+};
+
 var Attractors = {
-    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, 
+    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, MandelbrotAttractor,
     all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor]
 }
