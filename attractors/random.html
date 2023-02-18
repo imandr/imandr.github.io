@@ -27,29 +27,10 @@
 
         var options = {
             dt: 0.03,
-            beta: 0.2,
-            blur: 0.003,
-			kick: 0.002
+            beta: 0.1,
+            blur: 0.001,
+			kick: 0.01
         };
-        
-        if( Math.random() < 0.1 )
-        {
-            options.beta = 0.01;
-            options.attractors = [
-                    {
-                        kick: 0.002,
-                        pull: 0.3,
-                        blur: 0
-                    }
-                ];
-        }
-        else if( Math.random() < 0.5 )
-        {
-            options.beta = 0.9;
-            options.mix = 0.3;
-            options.kick = 0.001;
-            options.blur = 0;
-        }
         let q = new Dueling(document.getElementById("canvas"), options);
         q.start();
     </script>
