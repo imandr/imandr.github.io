@@ -6,7 +6,7 @@ class SingleAttractorAnimation
             options = {};
         this.NP = np;
         this.D = new attractor_class(this.NP, options);
-        this.DT = options.dt == null ? 0.01 : options.dt;
+        this.DT = options.dt == null ? 0.03 : options.dt;
         this.margin = 0;
         const w = window.innerWidth;
         const h = window.innerHeight;
@@ -26,7 +26,7 @@ class SingleAttractorAnimation
         var params = this.PMorpher.step(this.DT);
         for( var t = 0; t < Skip; t++ )
             this.D.step(params);
-        this.FrameInterval = 1.0/15 * 1000; // frame interval in milliseconds
+        this.FrameInterval = 1.0/10 * 1000; // frame interval in milliseconds
         this.Animating = false;
     }
 
@@ -117,11 +117,11 @@ class DuelingAttractorsAnimation
         this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
         this.SBM = new Morpher([0.2, 0.05], [0.8, 0.2]);
-        this.DT = options.dt == null ? 0.02 : options.dt;
+        this.DT = options.dt == null ? 0.03 : options.dt;
         this.Mix = options.mix == null ? 0.01 : options.mix;
         this.Share = options.share;
         this.Beta = options.beta;
-        this.FrameInterval = 1.0/15 * 1000; // frame interval in milliseconds
+        this.FrameInterval = 1.0/10 * 1000; // frame interval in milliseconds
 
         this.margin = 0;
         const w = window.innerWidth;

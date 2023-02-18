@@ -21,8 +21,8 @@ class BaseAttractor
         this.Pull = options.pull == null ? 1.0 : options.pull;
         this.Blur = options.blur == null ? 0.0 : options.blur;
         this.Points = [];
-        this.GPU = new GPU();       //{mode:"cpu"});
-        this.GPU = new GPU({mode:"cpu"});
+        this.GPU = new GPU();           //{mode:"cpu"});
+        //this.GPU = new GPU({mode:"dev"});
         this.transform_kernel = null;
         this.transform_with_pull_kernel = null;
 
@@ -563,7 +563,83 @@ class Inverse2Attractor extends BaseAttractor
     }
 };
 
+class ECAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        const P = 1.0;
+        const R = 3.5;
+        super(np, 
+            [0.1, 0.1, 0.1, 0.1], 
+            [5.9, 5.9, 5.9, 5.9], 
+            [-R, -R], 
+            [R, R], options);
+            
+            function Y(x, a, b)
+            {
+                const y2 = x*x*x + a*x + b;
+                if( y2 < 0 )
+                    return 0.0;
+                return Math.sqrt(y2);
+            }
+            
+            function Add(x1, x2, a, b)
+            {
+                const y1 = Y(x1, a, b);
+                const y2 = Y(x2, a, b);
+                if( x1 == x2 )
+                {
+                    const l = (3*x1*x1+a)/(2*y1);
+                    return l*l - 2*x1;
+                }
+                else
+                {
+                    const l = (y2-y1)/(x2-x1);
+                    return l*l - x1 - x2;
+                }
+            }
+
+            this.GPU.addFunction(Y);
+            this.GPU.addFunction(Add);
+
+            this.transform_with_pull_kernel = this.GPU.createKernel(
+                function(points, params, pull, blur)
+                {
+                    const xa = params[0];
+                    const xb = params[1];
+                    const ya = params[2];
+                    const yb = params[3];
+
+                    const x = points[this.thread.x][0];
+                    const y = points[this.thread.x][1];
+
+                    const xt = Add(x, y, xa, xb);
+                    const y1 = Add(y, xt, ya, yb);
+                    const x1 = Add(x, y1, xa, xb);
+
+                    const p2 = [x1/Math.cosh(x1), y1/Math.cosh(y1)];
+
+                    if( pull == 1 && blur == 0 )
+                        return p2;
+                    else
+                    {
+                        const r = Math.pow(Math.random(), 3.0);
+                        const t = pull * (1.0 - r*blur);
+                        return [x + (p2[0]-x)*t, y + (p2[1]-y)*t];
+                    }
+                },
+                { output: [this.NP] }
+            );
+            
+            this.random_point = function()
+            {
+                return [Math.random(), Math.random()];
+            }
+
+    }
+};
+
 var Attractors = {
-    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, MandelbrotAttractor,
+    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, MandelbrotAttractor, ECAttractor,
     all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, MandelbrotAttractor]
 }
