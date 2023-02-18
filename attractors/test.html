@@ -18,24 +18,25 @@
         {
             constructor(canvas_element, options)
             {
-                super(30000, canvas_element, Attractors.MandelbrotAttractor, options);
+                super(30000, canvas_element, Attractors.Inverse2Attractor, options);
             }
         }
         class Dual extends DuelingAttractorsAnimation
         {
             constructor(canvas_element, options)
             {
-                super(15000, canvas_element, [Attractors.MandelbrotAttractor, Attractors.MandelbrotAttractor], options);
+                super(15000, canvas_element, [Attractors.Inverse2Attractor, Attractors.Inverse2Attractor], options);
             }
         }
         const options = {
             beta: 0.2,
             //dt: 0.01,
             mix:0.02,
-            kick: 0.001,
-            blur: 0.003
+            pull: 1.1,
+            kick: 0.01,
+            blur: 0.001
         }
-        let q = new Dual(document.getElementById("canvas"), options);
+        let q = new Single(document.getElementById("canvas"), options);
         q.start();
     </script>
 </body>

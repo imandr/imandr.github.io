@@ -208,7 +208,7 @@ class Canvas2
         this.CX = (x0 + y1)/2;
         this.CY = (y0 + x1)/2;
         this.CleanInterval = 100;
-        this.Beta = 0.001;
+        this.Beta = 0.01;
         this.FirstUpdate = true;
         this.Margin = 0.38;
         this.DimX = dimx;

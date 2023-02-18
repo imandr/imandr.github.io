@@ -121,6 +121,7 @@ class DuelingAttractorsAnimation
         this.Mix = options.mix == null ? 0.01 : options.mix;
         this.Share = options.share;
         this.Beta = options.beta;
+        this.FrameInterval = 1.0/15 * 1000; // frame interval in milliseconds
 
         this.margin = 0;
         const w = window.innerWidth;

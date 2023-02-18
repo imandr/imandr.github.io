@@ -268,7 +268,7 @@ class TanhAttractor extends BaseAttractor
     }
 };
 
-class QExpAttractor___ extends BaseAttractor
+class QExpAttractor extends BaseAttractor
 {
     constructor(np, options)
     {
@@ -324,7 +324,7 @@ class QExpAttractor___ extends BaseAttractor
     }
 };
 
-class QExpAttractor extends BaseAttractor
+class QExpAttractor__ extends BaseAttractor
 {
     constructor(np, options)
     {
@@ -458,30 +458,107 @@ class MandelbrotAttractor extends BaseAttractor
             [1, 1], options);
 
             this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                const a = params[0];
-                const b = params[1];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-
-                const x_ = (x+a)*(x+a) - (y+b)*(y+b);
-                const y_ = 2*(x+a)*(y+b);
-				const r = Math.cosh(Math.sqrt(x_*x_ + y_*y_)/1.5);
-				const x1 = x_/r;
-				const y1 = y_/r;
-                
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
+                function(points, params, pull, blur)
                 {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [this.NP] }
-        );
+                    const a = params[0];
+                    const b = params[1];
+                    const x = points[this.thread.x][0];
+                    const y = points[this.thread.x][1];
+
+                    const x_ = (x+a)*(x+a) - (y+b)*(y+b);
+                    const y_ = 2*(x+a)*(y+b);
+    				const r = Math.cosh(Math.sqrt(x_*x_ + y_*y_)/1.5);
+    				const x1 = x_/r;
+    				const y1 = y_/r;
+                
+                    if( pull == 1 && blur == 0 )
+                        return [x1, y1];
+                    else
+                    {
+                        const r = Math.pow(Math.random(), 3.0);
+                        const t = pull * (1.0 - r*blur);
+                        return [x + (x1-x)*t, y + (y1-y)*t];
+                    }
+                },
+                { output: [this.NP] }
+            );
+            
+            this.random_point = function()
+            {
+                var point = this.random_point_uniform();
+                point[0] /= 2;
+                point[1] /= 2;
+                return point;
+            }
+
+    }
+};
+
+class Inverse2Attractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        const P = 1.0;
+        const R = 3.5;
+        super(np, 
+            [-1.5, -1.5, -0.5, -0.5, 0.1, 0.1, 0.0, 0.0], 
+            [ 1.5,  1.5,  0.5,  0.5, 0.7, 0.7, 3.14, 3.14], 
+            [-R, -R], 
+            [R, R], options);
+            
+            function Invert(x, y, xc, yc, rc, d)
+            {
+                const dx = x - xc;
+                const dy = y - yc;
+                const r = Math.sqrt(dx*dx + dy*dy) + 0.0001;
+                const t = Math.atan2(dy, dx);
+                const t1 = t + d*r*r*r/rc/rc/rc;
+                const r1 = rc*rc/r;
+                const r2 = r1;  ///Math.cosh(r1/20);
+                const x1 = xc + r2 * Math.cos(t1);
+                const y1 = yc + r2 * Math.sin(t1);
+                return [x1, y1];
+            }
+
+            this.GPU.addFunction(Invert);
+
+            this.transform_with_pull_kernel = this.GPU.createKernel(
+                function(points, params, pull, blur)
+                {
+                    const xa = params[0];
+                    const ya = params[1];
+                    const xb = params[2];
+                    const yb = params[3];
+                    const ra = params[4];
+                    const rb = params[5];
+                    const da = params[6];
+                    const db = params[7];
+
+                    const x = points[this.thread.x][0];
+                    const y = points[this.thread.x][1];
+
+                    const p = Invert(x, y, xa, ya, ra, da);
+                    const p2 = Invert(p[0], p[1], xb, yb, rb, db);
+
+                    if( pull == 1 && blur == 0 )
+                        return p2;
+                    else
+                    {
+                        const r = Math.pow(Math.random(), 3.0);
+                        const t = pull * (1.0 - r*blur);
+                        return [x + (p2[0]-x)*t, y + (p2[1]-y)*t];
+                    }
+                },
+                { output: [this.NP] }
+            );
+            
+            this.random_point = function()
+            {
+                var point = this.random_point_uniform();
+                point[0] *= 2;
+                point[1] *= 2;
+                return point;
+            }
 
     }
 };
