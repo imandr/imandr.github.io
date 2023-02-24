@@ -490,6 +490,12 @@ class MandelbrotAttractor extends BaseAttractor
                 point[1] /= 2;
                 return point;
             }
+			
+            this.random_point = function()
+            {
+				const a = Math.random() * Math.random() * Math.random() * 0.2 * 3.1415;
+				return [Math.sin(a), Math.cos(a)];
+            }
 
     }
 };
