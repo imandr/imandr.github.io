@@ -468,7 +468,7 @@ class MandelbrotAttractor extends BaseAttractor
                     const x_ = (x+a)*(x+a) - (y+b)*(y+b);
                     const y_ = 2*(x+a)*(y+b);
                     const r_ = Math.sqrt(x_*x_ + y_*y_) + 0.001;
-    				const r = r_/Math.cosh(r_/1.5);
+    				const r = r_/Math.cosh(r_*0.5);
     				const x1 = x_/r_*r;
     				const y1 = y_/r_*r;
                 
@@ -494,7 +494,7 @@ class MandelbrotAttractor extends BaseAttractor
 			
             this.random_point = function()
             {
-				const a = Math.random() * Math.random() * Math.random() * 0.2 * 3.1415;
+				const a = Math.random() * Math.random() * Math.random() * 2.0 * 3.1415;
 				return [Math.sin(a), Math.cos(a)];
             }
 
@@ -561,6 +561,6 @@ class MandelbrotTHAttractor extends BaseAttractor
 };
 
 var Attractors = {
-    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, MandelbrotAttractor, MandelbrotTHAttractor,
-    all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, MandelbrotAttractor, MandelbrotTHAttractor]
+    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, MandelbrotAttractor,
+    all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, MandelbrotAttractor]
 }
