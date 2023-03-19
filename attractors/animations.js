@@ -210,13 +210,13 @@ class DuelingAttractorsAnimation
         var s2 = 1-share;
         if( s1 > s2 )
         {
-            s2 = s2/s1 * 0.15;
-            s1 = 0.2;
+            s2 = s2/s1 * 0.1;
+            s1 = 0.1;
         }
         else
         {
-            s1 = s1/s2 * 0.15;
-            s2 = 0.2;
+            s1 = s1/s2 * 0.1;
+            s2 = 0.1;
         }
         this.C.points(points1, c1, s1);
         this.C.points(points2, c2, s2);
