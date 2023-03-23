@@ -174,7 +174,7 @@ class DuelingAttractorsAnimation
     
         //var D = new DeJong(0,0,0,0);
         this.Colors1 = new ColorChanger();
-        this.Colors2 = new ColorChanger();
+		this.DColor = new Morpher([0.1, -0.2, -0.2], [0.2, 0.2, 0.2]);
 
         const p12 = this.params12(this.DT, this.M1, this.M2, beta);
         const p1 = p12[0], p2 = p12[1];
@@ -189,10 +189,21 @@ class DuelingAttractorsAnimation
     
     step()
     {
-        var c1 = this.Colors1.next_color();
-        var c2 = this.Colors2.next_color();
-        for( let i = 0; i < 3; i++ )
-            c2[i] = (c2[i] + c1[i])/2;
+        var hsb1 = this.Colors1.next_hsb();
+		const dcolor = this.DColor.step(0.01);
+		var hsb2 = [
+			hsb1[0] + dcolor[0],
+			hsb1[1] + dcolor[1],
+			hsb1[2] + dcolor[2]
+		];
+		if( hsb2[1] > 1.0 ) hsb2[1] = 1.0;
+		if( hsb2[1] < 0.5 ) hsb2[1] = 0.5;
+		if( hsb2[2] > 1.0 ) hsb2[2] = 1.0;
+		if( hsb2[2] < 0.5 ) hsb2[2] = 0.5;
+		
+		const c1 = this.Colors1.hsb_to_rgb(hsb1);
+		const c2 = this.Colors1.hsb_to_rgb(hsb2);
+		
         const sb = this.beta_share()
         const beta = sb.beta
         const share = sb.share;

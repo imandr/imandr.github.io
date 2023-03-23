@@ -73,6 +73,8 @@ hsb_to_rgb = function (hsb) {
     while( h < 0.0 )
         h += 1.0;
 
+	h = h - Math.floor(h);
+
     if (s == 0)
         return [v,v,v];
 
@@ -97,13 +99,22 @@ hsb_to_rgb = function (hsb) {
 
 function ColorChanger()
 {
-    this.Morpher = new Morpher([-0.5, 0.9, 0.9], [7.5, 1.0, 1.0]);
+    this.Morpher = new Morpher([-0.5, 0.8, 0.9], [7.5, 1.0, 1.0]);
     
-    this.next_color = function()
+    this.next_hsb = function()
     {
         var hsb = this.Morpher.step(0.003);
-        var h = hsb[0] - Math.floor(hsb[0]);
-        return hsb_to_rgb([h, hsb[1], hsb[2]]);
+        return [hsb[0] - Math.floor(hsb[0]), hsb[1], hsb[2]];
     }
+
+    this.next_color = function()
+    {
+        return hsb_to_rgb(this.next_hsb());
+    }
+	
+	this.hsb_to_rgb = function(hsb)
+	{
+		return hsb_to_rgb(hsb);
+	}
 }
 
