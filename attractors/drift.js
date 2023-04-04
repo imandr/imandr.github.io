@@ -99,11 +99,12 @@ hsb_to_rgb = function (hsb) {
 
 function HSBMorpher()
 {
-    this.Morpher = new Morpher([-0.5, 0.9, 0.9], [7.5, 1.0, 1.0]);
+    this.Morpher = new Morpher([-0.5, 0.8, 0.9], [7.5, 1.0, 1.0]);
     
-    this.next_color = function()
+    this.next_hsb = function()
     {
         var hsb = this.Morpher.step(0.003);
+<<<<<<< HEAD
         var h = hsb[0] - Math.floor(hsb[0]);
         return [h, hsb[1], hsb[2]];
     }
@@ -117,6 +118,19 @@ function ColorChanger()
     {
         var hsb = this.Morpher.next_color();
         return hsb_to_rgb(hsb);
+=======
+        return [hsb[0] - Math.floor(hsb[0]), hsb[1], hsb[2]];
     }
+
+    this.next_color = function()
+    {
+        return hsb_to_rgb(this.next_hsb());
+>>>>>>> 529e61d69c1b0e84dd96f886f1544d552197d2bd
+    }
+	
+	this.hsb_to_rgb = function(hsb)
+	{
+		return hsb_to_rgb(hsb);
+	}
 }
 
