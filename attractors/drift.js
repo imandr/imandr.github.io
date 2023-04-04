@@ -113,12 +113,19 @@ function ColorChanger()
 {
     this.Morpher = new HSBMorpher();
     
-    this.next_color = function()
+    this.next_rgb = function()
     {
         var hsb = this.Morpher.next_hsb();
         return hsb_to_rgb(hsb);
     }
 	
+    this.next_color = this.next_rgb;            // alias
+    
+    this.next_hsb = function()
+    {
+        return this.Morpher.next_hsb();
+    }
+    
 	this.hsb_to_rgb = function(hsb)
 	{
 		return hsb_to_rgb(hsb);
