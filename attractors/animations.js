@@ -95,6 +95,203 @@ class SingleAttractorAnimation
     }
 }
 
+class ColoredAttractorAnimation
+{
+    constructor(np, canvas_element, attractor_class, options)
+    {
+        if( options == null )
+            options = {};
+        this.NP = np;
+        this.D = new attractor_class(this.NP, options);
+        this.DT = options.dt == null ? 0.03 : options.dt;
+        this.margin = 0;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const xmin = this.D.XMin;
+        const xmax = this.D.XMax;
+        this.C = new Canvas2(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
+        this.ClearColor = [0,0,0];
+        const qexp = this;
+        window.onresize = function() {
+            qexp.resize();
+        };
+        this.C.clear(this.ClearColor, 1.0);
+        this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
+        //var D = new DeJong(0,0,0,0);
+        const Skip = 10;
+        this.Colors = new ColorChanger();
+        var params = this.PMorpher.step(this.DT);
+        for( var t = 0; t < Skip; t++ )
+            this.D.step(params);
+        this.FrameInterval = 1.0/10 * 1000; // frame interval in milliseconds
+        this.Animating = false;
+    }
+
+    resize()
+    {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        this.C.resize(w-this.margin*2, h-this.margin*2);
+    };
+
+    point_color(p)
+    {
+        const x = p[0], y = p[1];
+        const xrel = (x-this.D.XMin[0])/(this.D.XMax[0]-this.D.XMin[0]);
+        const yrel = (y-this.D.XMin[1])/(this.D.XMax[1]-this.D.XMin[1]);
+        const zrel = 1 - Math.abs(xrel - yrel);
+        return [xrel, yrel, zrel];
+    }
+
+    step()
+    {
+        const c = this.Colors.next_color();
+        const params = this.PMorpher.step(this.DT);
+        
+        var colors = [];
+        for( const p of this.D.Points )
+            colors.push(this.point_color(p));
+        
+        const points = this.D.step(params);
+        this.C.clear(this.ClearColor, 0.15);
+        this.C.points(points, colors, 0.15);
+        this.C.render();
+    }
+    
+    animate_one_frame()
+    {
+        if( this.Animating )
+            setTimeout(
+                function (animation) {
+                    window.requestAnimationFrame(function() 
+                        {
+                            animation.animate_one_frame()
+                        }
+                    )
+                },
+                this.FrameInterval, 
+                this
+            );
+        this.step();
+    }
+
+    start()
+    {
+        this.Animating = true;
+        const qexp = this;
+        window.requestAnimationFrame(function() 
+            {
+                qexp.animate_one_frame()
+            }
+        );
+    }
+    
+    stop()
+    {
+        this.Animating = false;
+    }
+}
+
+class HSBAttractorAnimation
+{
+    constructor(np, canvas_element, attractor_class, options)
+    {
+        if( options == null )
+            options = {};
+        this.NP = np;
+        this.D = new attractor_class(this.NP, options);
+        this.DT = options.dt == null ? 0.03 : options.dt;
+        this.margin = 0;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const xmin = this.D.XMin;
+        const xmax = this.D.XMax;
+        this.C = new Canvas2(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1]);
+        this.ClearColor = [0,0,0];
+        const qexp = this;
+        window.onresize = function() {
+            qexp.resize();
+        };
+        this.C.clear(this.ClearColor, 1.0);
+        this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
+        //var D = new DeJong(0,0,0,0);
+        const Skip = 10;
+        this.HSB = new HSBMorpher();
+        var params = this.PMorpher.step(this.DT);
+        for( var t = 0; t < Skip; t++ )
+            this.D.step(params);
+        this.FrameInterval = 1.0/10 * 1000; // frame interval in milliseconds
+        this.Animating = false;
+    }
+
+    resize()
+    {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        this.C.resize(w-this.margin*2, h-this.margin*2);
+    };
+
+    point_color(p, hue)
+    {
+        const x = p[0], y = p[1];
+        const xrel = (x-this.D.XMin[0])/(this.D.XMax[0]-this.D.XMin[0]);
+        const yrel = (y-this.D.XMin[1])/(this.D.XMax[1]-this.D.XMin[1]);
+        const zrel = ((xrel - yrel) + 1)/2;
+        const s = 0.5 + 0.5*xrel;
+        const b = 0.9 + 0.1*yrel;
+        const h = zrel;
+        return hsb_to_rgb([hue + h/3, s, b]);
+    }
+
+    step()
+    {
+        const hue = this.HSB.next_color()[0];
+        const params = this.PMorpher.step(this.DT);
+        
+        var colors = [];
+        for( const p of this.D.Points )
+            colors.push(this.point_color(p, hue));
+        
+        const points = this.D.step(params);
+        this.C.clear(this.ClearColor, 0.15);
+        this.C.points(points, colors, 0.15);
+        this.C.render();
+    }
+    
+    animate_one_frame()
+    {
+        if( this.Animating )
+            setTimeout(
+                function (animation) {
+                    window.requestAnimationFrame(function() 
+                        {
+                            animation.animate_one_frame()
+                        }
+                    )
+                },
+                this.FrameInterval, 
+                this
+            );
+        this.step();
+    }
+
+    start()
+    {
+        this.Animating = true;
+        const qexp = this;
+        window.requestAnimationFrame(function() 
+            {
+                qexp.animate_one_frame()
+            }
+        );
+    }
+    
+    stop()
+    {
+        this.Animating = false;
+    }
+}
+
 class DuelingAttractorsAnimation
 {
     constructor(np, canvas_element, attractor_class, options)

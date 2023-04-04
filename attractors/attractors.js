@@ -1,6 +1,6 @@
 class BaseAttractor
 {
-    constructor(np, pmin, pmax, xmin, xmax, options)
+    constructor(np, pmin, pmax, xmin, xmax, options, F, functions)
     {
         this.Rate = 0.02;
         this.PMin = pmin;
@@ -52,6 +52,33 @@ class BaseAttractor
             return p;
         }
 
+        if( functions != null )
+            for( let f of functions )
+                this.GPU.addFunction(f);
+        this.GPU.addFunction(F);
+        this.F = F;
+
+        this.transform_with_pull_kernel = this.GPU.createKernel(
+            function(points, params, pull, blur)
+            {
+                const x = points[this.thread.x][0];
+                const y = points[this.thread.x][1];
+
+                const xy1 = Z(points[this.thread.x][0], points[this.thread.x][1], params);
+                
+                if( pull == 1 && blur == 0 )
+                    return xy1;
+                else
+                {
+                    const x1 = xy1[0], y1 = xy1[1];
+                    const r = Math.pow(Math.random(), 3.0);
+                    const t = pull * (1.0 - r*blur);
+                    return [x + (x1-x)*t, y + (y1-y)*t];
+                }
+            },
+            { output: [this.NP] }
+        );
+
         this.random_point = this.random_point_uniform;
         this.init_points();
     }
@@ -74,7 +101,9 @@ class BaseAttractor
             for(let i = 0; i < this.Points.length; i++)
                 if( Math.random() < this.Kick )
                 {
-                    this.Points[i] = this.random_point()
+                    var r = this.random_point();
+                    //r = this.F(r[0], r[1], params);
+                    this.Points[i] = this.F(r[0], r[1], params);
                 }
         var points1 = this.transform(this.Points, params, this.Pull, this.Blur);
         this.Points = points1;
@@ -87,69 +116,21 @@ class DeJongAttractor extends BaseAttractor
 {
     constructor(np, options)
     {
+        function Z(x, y, params)
+        {
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const D = params[3];
+            const x1 = Math.sin(A*y) - Math.cos(B*x);
+            const y1 = Math.sin(C*x) - Math.cos(D*y);
+            return [x1, y1];
+        }
+
         const P = 2.5;
         const R = 2.5;
         super(np, [-P, -P, -P, -P], [P, P, P, P],
-            [-R, -R], [R, R], options);
-
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                //debugger;
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const x1 = Math.sin(A*y) - Math.cos(B*x);
-                const y1 = Math.sin(C*x) - Math.cos(D*y);
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
-                {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [np] }
-        );
-    }
-};
-
-class DeJongModAttractor extends BaseAttractor
-{
-    constructor(np, options)
-    {
-        const P = 2.5;
-        const R = 2.5;
-        super(np, [-P, -P, -P, -P], [P, P, P, P],
-            [-R, -R], [R, R], options);
-
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                //debugger;
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const x1 = Math.sin(A*y)/Math.cosh(y) - Math.cos(B*x)/Math.cosh(3*x);
-                const y1 = Math.sin(C*x)/Math.cosh(x) - Math.cos(D*y)/Math.cosh(3*y);
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
-                {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [np] }
-        );
+            [-R, -R], [R, R], options, Z);
     }
 };
 
@@ -159,12 +140,6 @@ class CubicAttractor extends BaseAttractor
     {
         const P = 1.2;
         const R = 3.0;
-        super(np, 
-            [-P, -P, -P, -P], 
-            [P, P, P, P],
-            [-R, -R], 
-            [R, R], options
-        );
 
         function G(x)
         {
@@ -181,34 +156,25 @@ class CubicAttractor extends BaseAttractor
             return 2.3*x/(1+2*x*x);
         }
 
-        this.GPU.addFunction(G);
-        this.GPU.addFunction(F);
-        this.GPU.addFunction(H);
+        function Z(x, y, params)
+        {
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const D = params[3];
+            const x1 = F(A*x) + H(B*y);
+            const y1 = F(C*y) + H(D*x);
+            return [x1, y1];
+        }
 
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const x1 = F(A*x) + H(B*y);
-                const y1 = F(C*y) + H(D*x);
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
-                {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [this.NP] }
+        super(np, 
+            [-P, -P, -P, -P], 
+            [P, P, P, P],
+            [-R, -R], 
+            [R, R], options, Z, [F,H]
         );
-    }
-};
+    };
+}
 
 class TanhAttractor extends BaseAttractor
 {
@@ -216,17 +182,6 @@ class TanhAttractor extends BaseAttractor
     {
         const P = 1.2;
         const R = 3.0;
-        super(np, 
-            [-P, -P, 0.2, 0.2], 
-            [P, P, P, P],
-            [-R, -R], 
-            [R, R], options
-        );
-
-        function F(x)
-        {
-            return Math.tanh(x);
-        }
 
         function G(x)
         {
@@ -238,32 +193,24 @@ class TanhAttractor extends BaseAttractor
             return Math.tanh(x*x*x - 1.5*x + 0.5*x*x);
         }
 
-        this.GPU.addFunction(G);
-        this.GPU.addFunction(F);
-        this.GPU.addFunction(H);
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                //const E = params[4];
-                //const F = params[5];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const x1 = A*H(x) + B*G(y); // + E*F(y);
-                const y1 = C*H(y) + D*G(x); // + F*F(x);
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
-                {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [this.NP] }
+        function Z(x, y, params)
+        {
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const D = params[3];
+            const E = params[4];
+            const F = params[5];
+            const x1 = A*H(x) + B*G(y) + E*G(x); // + E*F(y);
+            const y1 = C*H(y) + D*G(x) + F*G(y); 
+            return [x1, y1];
+        }
+
+        super(np, 
+            [-P, -P, -P, -P, -1.5, -1.5], 
+            [P, P, P, P, 1.5, 1.5],
+            [-R, -R], 
+            [R, R], options, Z, [H,G]
         );
     }
 };
@@ -274,11 +221,6 @@ class QExpAttractor extends BaseAttractor
     {
         const P = 2.2;
         const R = 3.0;
-        super(np, 
-            [-P, -P, 0.2, 0.2], 
-            [P, P, P, P],
-            [-R, -R], 
-            [R, R], options);
 
         function G(x)
         {
@@ -295,92 +237,22 @@ class QExpAttractor extends BaseAttractor
             return 2.3*x/Math.cosh(2*x);
         }
 
-        this.GPU.addFunction(G);
-        this.GPU.addFunction(F);
-        this.GPU.addFunction(H);
-
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const x1 = F(A*x) + H(B*y);
-                const y1 = F(C*y) + H(D*x);
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
-                {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [this.NP] }
-        );
-    }
-};
-
-class QExpAttractor__ extends BaseAttractor
-{
-    constructor(np, options)
-    {
-        const P = 1.0;
-        const R = 3.0;
-        
-        var pmin = [], pmax = [];
-        const nparams = 16;
-        for( let i = 0; i < nparams; i++ )
+        function Z(x, y, params)
         {
-            pmin.push(-P);
-            pmax.push(P);
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const D = params[3];
+            const x1 = F(A*x) + H(B*y);
+            const y1 = F(C*y) + H(D*x);
+            return [x1, y1];
         }
         
-        super(np, pmin, pmax, [-R, -R], 
-            [R, R], options);
-
-        function F(x, a, b)
-        {
-            return (a*x*x + 7*b*x)/Math.cosh(2*x);
-        }
-
-        function G(x, a, b)
-        {
-            return (7*a*x + b)/Math.cosh(2*x);
-        }
-
-        this.GPU.addFunction(F);
-        this.GPU.addFunction(G);
-
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const D = params[3];
-                const P = params[4];
-                const Q = params[5];
-                const R = params[6];
-                const S = params[7];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const x1 = F(x, A, B) + G(y, P, Q);
-                const y1 = F(y, C, D) + G(x, R, S);
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
-                {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [this.NP] }
-        );
+        super(np, 
+            [-P, -P, 0.2, 0.2], 
+            [P, P, P, P],
+            [-R, -R], 
+            [R, R], options, Z, [F, H]);
     }
 };
 
@@ -388,13 +260,8 @@ class HyperAttractor extends BaseAttractor
 {
     constructor(np, options)
     {
-        const P = 3.0;
+        const P = 5.0;
         const R = 3.5;
-        super(np, 
-            [-P, 0.3, 0.3, -P, 0.3, 0.3], 
-            [P, P, P, P, P, P],
-            [-R, -R], 
-            [R, R], options);
 
         function G(x)
         {
@@ -411,35 +278,53 @@ class HyperAttractor extends BaseAttractor
             return (2.0/Math.cosh(10*x)-1)/Math.cosh(x);
         }
 
-        this.GPU.addFunction(G);
-        this.GPU.addFunction(F);
-        this.GPU.addFunction(H);
+        function Z(x, y, params)
+        {
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const P = params[3];
+            const Q = params[4];
+            const R = params[5];
+            const x1 = G(A*x) + B*F(C*y);
+            const y1 = G(P*y) + Q*F(R*x);
+            return [x1, y1];
+        }
+        super(np, 
+            [-P, 0.3, 0.3, -P, 0.3, 0.7], 
+            [P, P, P, P, P, P],
+            [-R, -R], 
+            [R, R], options, Z, [G,F]);
+    }
+};
 
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                const A = params[0];
-                const B = params[1];
-                const C = params[2];
-                const P = params[3];
-                const Q = params[4];
-                const R = params[5];
-                const x = points[this.thread.x][0];
-                const y = points[this.thread.x][1];
-                const x1 = G(A*x) + B*F(C*y);
-                const y1 = G(P*y) + Q*F(R*x);
-                if( pull == 1 && blur == 0 )
-                    return [x1, y1];
-                else
-                {
-                    const r = Math.pow(Math.random(), 3.0);
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [this.NP] }
-        );
+class BiFurcAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        function Y(x)
+        {
+            return 4*x*(1-x);
+        }
 
+        function Z(x, y, params)
+        {
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const D = params[3];
+            const P = params[4];
+            const Q = params[5];
+            const x1 = (-A*Y(x) + P*B*Y(y))/2;
+            const y1 = (-C*Y(y) + Q*D*Y(x))/2;
+            return [Math.tanh(0.9*x1), Math.tanh(1.1*y1)];
+        };
+        //console.log("init...");
+        super(np, 
+            [0.75, 0.75, 0.75, 0.75, 0.2, -0.5], 
+            [1, 1, 1, 1, 0.5, -0.2],
+            [-1, -1], 
+            [1, 1], options, Z, [Y]);
     }
 };
 
@@ -449,118 +334,47 @@ class MandelbrotAttractor extends BaseAttractor
     {
         const P = 1.0;
         const R = 3.5;
+        
+        function Z(x, y, params)
+        {
+            const a = params[0];
+            const b = params[1];
+
+            const x_ = (x+a)*(x+a) - (y+b)*(y+b);
+            const y_ = 2*(x+a)*(y+b);
+            const r_ = Math.sqrt(x_*x_ + y_*y_) + 0.001;
+			const r = r_/Math.cosh(r_*0.5);
+			const x1 = x_/r_*r;
+			const y1 = y_/r_*r;
+            return [x1, y1];
+        }
+        
         super(np, 
             //[0.3, 0.0], 
             //[0.8, 0.5],
             [0.1, 0.1], 
             [1.5, 1.5],
             [-1, -1], 
-            [1, 1], options);
-
-            this.transform_with_pull_kernel = this.GPU.createKernel(
-                function(points, params, pull, blur)
-                {
-                    const a = params[0];
-                    const b = params[1];
-                    const x = points[this.thread.x][0];
-                    const y = points[this.thread.x][1];
-
-                    const x_ = (x+a)*(x+a) - (y+b)*(y+b);
-                    const y_ = 2*(x+a)*(y+b);
-                    const r_ = Math.sqrt(x_*x_ + y_*y_) + 0.001;
-    				const r = r_/Math.cosh(r_*0.5);
-    				const x1 = x_/r_*r;
-    				const y1 = y_/r_*r;
-                
-                    if( pull == 1 && blur == 0 )
-                        return [x1, y1];
-                    else
-                    {
-                        const r = Math.pow(Math.random(), 3.0);
-                        const t = pull * (1.0 - r*blur);
-                        return [x + (x1-x)*t, y + (y1-y)*t];
-                    }
-                },
-                { output: [this.NP] }
-            );
+            [1, 1], options, Z);
             
-            this.random_point = function()
-            {
-                var point = this.random_point_uniform();
-                point[0] /= 2;
-                point[1] /= 2;
-                return point;
-            }
-			
-            this.random_point = function()
-            {
-				const a = Math.random() * Math.random() * Math.random() * 2.0 * 3.1415;
-				return [Math.sin(a), Math.cos(a)];
-            }
-
-    }
-};
-
-class MandelbrotTHAttractor extends BaseAttractor
-{
-    constructor(np, options)
-    {
-        const P = 1.0;
-        const R = 3.5;
-        super(np, 
-            //[0.3, 0.0], 
-            //[0.8, 0.5],
-            [-1.0, -1.0], 
-            [1.5, 1.5],
-            [-1, -1], 
-            [1, 1], options);
-
-            this.transform_with_pull_kernel = this.GPU.createKernel(
-                function(points, params, pull, blur)
-                {
-                    const a = params[0];
-                    const b = params[1];
-                    const x = points[this.thread.x][0];
-                    const y = points[this.thread.x][1];
-
-                    const x_ = (x+a)*(x+a) - (y+b)*(y+b);
-                    const y_ = 2*(x+a)*(y+b);
-                    const r_ = Math.sqrt(x_*x_ + y_*y_) + 0.001;
-                    const r = Math.tanh(r_);
-    				const x1 = x_/r_*r;
-    				const y1 = y_/r_*r;
-                
-                    if( pull == 1 && blur == 0 )
-                        return [x1, y1];
-                    else
-                    {
-                        const r = Math.pow(Math.random(), 3.0);
-                        const t = pull * (1.0 - r*blur);
-                        return [x + (x1-x)*t, y + (y1-y)*t];
-                    }
-                },
-                { output: [this.NP] }
-            );
-            
-            this.__random_point = function()
-            {
-                var point = this.random_point_uniform();
-                point[0] /= 2;
-                point[1] /= 2;
-                return point;
-            }
-			
-            this.__random_point = function()
-            {
-				const a = Math.random() * Math.random() * Math.random() * 2 * 3.1415;
-                //return [1.0, a];
-				return [Math.sin(a), Math.cos(a)];
-            }
+        this.random_point = function()
+        {
+            var point = this.random_point_uniform();
+            point[0] /= 2;
+            point[1] /= 2;
+            return point;
+        }
+		
+        this.random_point = function()
+        {
+			const a = Math.random() * Math.random() * Math.random() * 2.0 * 3.1415;
+			return [Math.sin(a), Math.cos(a)];
+        }
 
     }
 };
 
 var Attractors = {
-    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongModAttractor, MandelbrotAttractor,
+    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongAttractor, MandelbrotAttractor,
     all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, MandelbrotAttractor]
 }

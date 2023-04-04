@@ -277,11 +277,14 @@ class Canvas2
         }
     }
 
-    points(points, color, alpha)
+    points(points, colors, alpha)
     {
         // color is list of 3 floats from 0 to 1
+        
+        if( !Array.isArray(colors[0]) )
+            colors = [colors];
+        const NColors = colors.length;
         this.Ctx.globalAlpha = alpha;
-        this.Ctx.fillStyle = 'rgb(' + Math.floor(color[0]*256) + ',' +  Math.floor(color[1]*256) + ',' +  Math.floor(color[2]*256) + ')';
         this.Ctx.strokeStyle = 'rgb(200, 200, 200)';
         var sx = 0.0;
         var sy = 0.0;
@@ -305,9 +308,18 @@ class Canvas2
                 if( y < ymin )  ymin = y;
                 else if( y > ymax ) ymax = y;
             }
-
-        for( let p of mapped )
-        {        
+        
+        var icolor = -1;
+        for( let i = 0; i < mapped.length; i++ )
+        {   
+            const p = mapped[i];
+            const ic = i % NColors;
+            if( ic != icolor )
+            {
+                const color = colors[ic];
+                this.Ctx.fillStyle = 'rgb(' + Math.floor(color[0]*256) + ',' +  Math.floor(color[1]*256) + ',' +  Math.floor(color[2]*256) + ')';
+                icolor = ic;
+            }
             const ix = Math.floor(p[0]);
             const iy = Math.floor(p[1]);
             if( Math.random() < 0.5 )
