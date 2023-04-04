@@ -115,7 +115,7 @@ function ColorChanger()
     
     this.next_color = function()
     {
-        var hsb = this.Morpher.next_color();
+        var hsb = this.Morpher.next_hsb();
         return hsb_to_rgb(hsb);
     }
 	
