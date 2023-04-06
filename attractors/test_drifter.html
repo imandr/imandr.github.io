@@ -1,0 +1,59 @@
+<html>
+<head>
+    <script src="drift.js"></script>
+</head>
+
+<body>
+    <canvas id="canvas" width="1000" height="1000"></canvas>
+    
+    <script>
+        var d = new Drifter([0, 0], [1, 1]);
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = "black";
+        
+        function render_step()
+        {
+            
+            if( Math.random() < 0.01 )
+                d.kick();
+            
+            ctx.clearRect(0, 0, w, h);
+            ctx.rect(0,0,w-1, h-1);
+            ctx.stroke();
+            const p = d.step(0.01);
+            const x = p[0]*w;
+            const y = p[1]*h;
+            ctx.fillRect(x-1, y-1, 2, 2);
+            
+            const z = d.lead();
+            const zx = z[0]*w;
+            const zy = z[1]*h;
+            ctx.fillRect(zx-1, zy-1, 2, 2);
+            
+        }
+        
+        function animate_one_frame()
+        {
+            setTimeout(
+                function () {
+                    window.requestAnimationFrame(
+                        function() 
+                        {
+                            animate_one_frame()
+                        }
+                    )
+                },
+                1/10 * 1000
+            );
+            render_step()
+        }
+
+        animate_one_frame();
+    </script>
+</body>
+</html>
+    

@@ -1,3 +1,148 @@
+class Drifter
+{
+    constructor(pmin, pmax, initial)
+    {
+        this.M = 0.95;
+        this.PMin = pmin;
+        this.PMax = pmax;
+        this.Lead = [];
+        this.Point = [];
+        this.V = [];
+        this.VTarget = 0.05;
+        
+        var i;
+        this.N = pmax.length;
+        this.Lead = this.random_vec(this.N, 0, 1);
+        this.Point = this.scale(this.Lead, 1.0);
+        this.V = this.random_vec(this.N, -1, 1, this.VTarget);
+        this.Acceleration = 1.0;
+    }
+
+    lead()
+    {
+        return this.map(this.Lead, 0, 1, this.PMin, this.PMax);
+    }
+
+    map(vec, vmin, vmax, xmin, xmax)
+    {   // assume vec[i] between vmin and vmax, lienary map vec[i] to [xmin[i]...xmax[i]]
+        
+        var out = [];
+        const dv = vmax - vmin;
+        for( let i = 0; i < vec.length; i++ )
+            out.push(xmin[i] + (vec[i] - vmin)/dv*(xmax[i]-xmin[i]));
+        return out;
+    }
+    
+    add(vec, delta, inplace)
+    {
+        if( inplace != null && inplace )
+        {
+            for( let i = 0; i < vec.length; i++ )
+                vec[i] += delta[i];
+            return vec;
+        }
+        else
+        {
+            var out = [];
+            for( let i = 0; i < vec.length; i++ )
+                out.push(vec[i] + delta[i]);
+            return out;
+        }        
+    }
+    
+    scale(vec, scalar, inplace)
+    {
+        if( inplace != null && inplace )
+        {
+            for( let i = 0; i < vec.length; i++ )
+                vec[i] *= scalar;
+            return vec;
+        }
+        else
+        {
+            var out = [];
+            for( let i = 0; i < vec.length; i++ )
+                out.push(vec[i] * scalar);
+            return out;
+        }
+    }
+
+    random_vec(n, vmin, vmax, norm)
+    {
+        var out = [];
+        for(let i = 0; i < n; i++ )
+            out.push(vmin + Math.random()*(vmax-vmin));
+        if( norm != null )
+        {
+            this.normalize(out, norm, true);
+        }
+        return out;
+    }
+
+    mag(vec)
+    {
+        var r2 = 0;
+        for( let x of vec )
+            r2 += x*x;
+        return Math.sqrt(r2);
+    }
+        
+    normalize(vec, mag, inplace)
+    {   // scale the vec so that it has given magnitude
+        if( mag == null )   mag = 1.0;
+        
+        const r = this.mag(vec);
+        
+        if( inplace != null && inplace )
+        {
+            for( let i = 0; i < vec.length; i++ )
+                vec[i] = vec[i]/r*mag;
+            return vec;
+        }
+        else
+        {
+            var out = [];
+            for( let x of vec )
+                out.push(x/r*mag);        
+            return out;
+        }
+    }
+    
+    _vstep()
+    {
+        const dv = this.random_vec(this.N, -1, 1, this.VTarget/10);
+        const v1 = this.add(this.V, dv);
+        const vnorm = this.mag(v1) * 0.99 + 0.01 * this.VTarget * this.Acceleration;
+        this.V = this.normalize(v1, vnorm);
+        return this.V;
+    }
+    
+    step(dt)
+    {
+        this._vstep();
+        var xnew = this.add(this.Lead, this.scale(this.V, dt));
+
+        for( let i = 0; i < this.N; i++ )
+            if( xnew[i] <= 0 || xnew[i] >= 1 )
+                this.V[i] = -this.V[i];
+        
+        this.Lead = this.add(this.Lead, this.scale(this.V, dt));
+        this.Point = this.add(this.scale(this.Lead, 1-this.M), this.scale(this.Point, this.M));
+        
+        return this.map(this.Point, 0, 1, this.PMin, this.PMax);
+    }
+    
+    accelerate(a)
+    {
+        this.Acceleration = a;
+    }
+    
+    kick()
+    {
+        this.V = this.scale(this.V, -1);
+    }
+}
+
 function Morpher(pmin, pmax, initial)
 {
     this.M = 0.95;

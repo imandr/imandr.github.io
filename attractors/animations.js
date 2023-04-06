@@ -19,7 +19,7 @@ class SingleAttractorAnimation
             qexp.resize();
         };
         this.C.clear(this.ClearColor, 1.0);
-        this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
+        this.PMorpher = new Drifter(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
         const Skip = 10;
         this.Colors = new ColorChanger();
@@ -28,6 +28,9 @@ class SingleAttractorAnimation
             this.D.step(params);
         this.FrameInterval = 1.0/10 * 1000; // frame interval in milliseconds
         this.Animating = false;
+        this.L = null;
+        this.T = 0;
+        this.stepCallback = options.step_callback;
     }
 
     resize()
@@ -45,6 +48,12 @@ class SingleAttractorAnimation
         this.C.clear(this.ClearColor, 0.15);
         this.C.points(points, c, 0.15);
         this.C.render();
+        if( (++this.T) % 10 == 0 )
+        {
+            this.L = this.D.lyapunov(params);
+            if( this.stepCallback != null )
+                this.stepCallback(this);
+        }
     }
     
     animate_one_frame__()

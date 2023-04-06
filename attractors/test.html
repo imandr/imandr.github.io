@@ -13,19 +13,41 @@
 <body class="noscroll">
     
     <canvas id="canvas"></canvas>
+    <div id="monitor" style="position:fixed; bottom:5px; right:5px; display:block; color: white; font: 10pt arial"></div>
     <script>
+        
+        function step_callback(animation)
+        {
+            const d = document.getElementById("monitor");
+            if( animation.L < 0 )
+                d.style.color = "red";
+            else
+                d.style.color = "green";
+                
+            if( d != null )
+                d.innerHTML = "L=" + animation.L;
+            if( animation.LastL != null && animation.LastL >= 0 && animation.L < -0.2 )
+                animation.PMorpher.kick();
+            if( animation.L < -0.2 )
+                animation.PMorpher.accelerate(5);
+            else
+                animation.PMorpher.accelerate(1.0);
+            animation.LastL = animation.L;
+        }
+        
         class Single extends SingleAttractorAnimation
         {
             constructor(canvas_element, options)
             {
-                super(30000, canvas_element, Attractors.QExpAttractor, options);
+                options.step_callback = step_callback;
+                super(30000, canvas_element, Attractors.MandelbrotAttractor, options);
             }
         }
         class Dual extends DuelingAttractorsAnimation
         {
             constructor(canvas_element, options)
             {
-                super(15000, canvas_element, [Attractors.QExpAttractor, Attractors.QExpAttractor], options);
+                super(15000, canvas_element, [Attractors.IkedaAttractor, Attractors.IkedaAttractor], options);
             }
         }
         const options = {

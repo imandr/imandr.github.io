@@ -298,7 +298,7 @@ class Canvas2
             ymin = mapped[0][1];
         var xmax = xmin, ymax = ymin;
         
-        if( false )
+        if( true )
             for( p of mapped )
             {
                 const x = p[0];
