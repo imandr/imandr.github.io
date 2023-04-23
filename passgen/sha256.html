@@ -1,0 +1,19 @@
+<html>
+<head>
+    <script src="sha256.js"></script>
+    
+</head>
+<body>
+    
+    Text: <input type="text" id="text"/>&nbsp;<button onclick="calculate()">calculate</button><br/>
+    SHA256: <span id="sha256"></span>
+
+    <script>
+        function calculate()
+        {
+            const text = document.getElementById("text").value;
+            document.getElementById("sha256").innerHTML = sha256(text, true);
+        }
+    </script>
+</body>
+</html>

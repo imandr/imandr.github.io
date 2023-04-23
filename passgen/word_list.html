@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body id="body">
+    <h1>Random Phrase Generator</h1>
+    <span class="comment">Generates random <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP39</a> pass phrase</span>
+    
+    
+    <div id="list_frame" class="margin">
+        <div id="generated_list" style="background-color:#EEE; padding:10px"></div>
+    </div>
+    
+    <div style="text-align:left" class="margin">
+                    <input type="checkbox" id="hideCheckbox"/>&nbsp;<label>hide</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button id="generateButton">generate</button>
+                <button id="clearButton">clear</button>
+                <button id="copyButton" disabled="disabled">copy</button>&nbsp;&nbsp;&nbsp;<span class="comment" id="copied_text"></span>
+    </div>
+
+    <table class="form">
+        <tr>
+            <th>Length:</th>
+            <td>
+                <select id="length">
+                    <option value="12">12</option>
+                    <option value="18">18</option>
+                    <option value="24">24</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <span class="comment">Combinations:</span> <span class="comment" id="combinations"></span><br/>
+                <span class="comment">Entropy:</span> <span class="comment" id="entropy"></span><br/><br/>
+                <span class="comment">Age of the Universe: 4*10<sup>23</sup> microseconds;<br/>
+                        Estimated number of grains of sand in the Universe: 10<sup>34</sup></span>
+            </td>
+        </tr>
+
+    </table>    
+    
+    <!--
+        <p style="color:gray; position: fixed; bottom:5px">
+        Random password generator is only as good as the random number generator it uses to pick random characrets for the password. 
+        Many popular random password generators available
+        on the internet use basic pseudo-random number generator, which is known not to be good for cryptographic purposes. 
+        Unlike many others, this password generator uses cryptographically strong random number generator and therefore 
+        produces reliably random, hard to guess passwords.
+        </p>
+    -->
+        
+        
+    <p id="message"></p>
+    <script src="bitstream.js"></script>
+    <script src="sha256.js"></script>
+    <script src="bip39.js"></script>
+    <script src="listgen.js"></script>
+</body>
+
+</html>

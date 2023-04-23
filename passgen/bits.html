@@ -1,0 +1,37 @@
+<html>
+<head>
+    <script src="bitstream.js"></script>
+    
+</head>
+<body>
+    
+    Text: <input type="text" id="text"/>&nbsp;<button onclick="go()">go</button><br/>
+    Result: <span id="result"></span>
+
+    <script>
+        function go()
+        {
+            const text = document.getElementById("text").value;            
+            var stream = new BitStream(text);
+
+            var copy = new BitStream();
+            while( stream.N > 0 )
+            {
+                const part = stream.pull(3);
+                const part_int = part.as_int();
+                copy.push(part);
+            }
+            
+            document.getElementById("result").innerHTML = copy.as_string();
+            return;
+            
+
+
+            const first2 = bs.pull(16);
+            var res = first2.as_string() + " " + "x" + bs.as_hex() + " '" + bs.as_string() + "' " + bs.as_bytes();
+            
+            document.getElementById("result").innerHTML = res;
+        }
+    </script>
+</body>
+</html>
