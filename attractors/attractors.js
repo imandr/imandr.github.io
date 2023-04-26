@@ -30,7 +30,7 @@ class BaseAttractor
         this.transform_kernel = null;
         this.transform_with_pull_kernel = null;
 
-        this.normal = function()
+        const normal = function()
         {
             return Math.random() + Math.random() + Math.random() + Math.random()
                 + Math.random() + Math.random() + Math.random() + Math.random()
@@ -60,6 +60,7 @@ class BaseAttractor
             for( let f of functions )
                 this.GPU.addFunction(f);
         this.GPU.addFunction(F);
+        //this.GPU.addFunction(normal);
         this.F = F;
 
         this.transform_with_pull_kernel = this.GPU.createKernel(
@@ -74,7 +75,11 @@ class BaseAttractor
                     const x = points[this.thread.x][0];
                     const y = points[this.thread.x][1];
                     const x1 = xy1[0], y1 = xy1[1];
-                    const r = Math.pow(Math.random(), 3.0);
+                    //const r = Math.pow(Math.random(), 3.0);
+                    const r = Math.random() + Math.random() + Math.random() + Math.random()
+                            + Math.random() + Math.random() + Math.random() + Math.random()
+                            + Math.random() + Math.random() + Math.random() + Math.random()
+                            - 6.0;
                     const t = pull * (1.0 - r*blur);
                     return [x + (x1-x)*t, y + (y1-y)*t];
                 }

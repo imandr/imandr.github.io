@@ -19,9 +19,28 @@
             constructor(canvas_element, options)
             {
                 const n = Attractors.all.length;
-                const i = Math.floor(Math.random() * n);
-                const att = Attractors.all[i];
-                super(20000, canvas_element, att, options);
+                const i1 = Math.floor(Math.random() * n);
+                const i2 = Math.random() < 0.5 ? Math.floor(Math.random() * n) : i1;
+                const att1 = Attractors.all[i1];
+                const att2 = Attractors.all[i2];
+                var options;
+                if( i1 == i2 )
+                    options = {
+                        dt: 0.01,
+                        beta: 0.03,
+                        blur: 0.002,
+            			kick: 0.01,
+                        mix: 0.01
+                    };
+                else
+                    options = {
+                        dt: 0.01,
+                        beta: 1.0,
+                        blur: 0.002,
+            			kick: 0.01,
+                        mix: 0.2
+                    };
+                super(20000, canvas_element, [att1, att2], options);
             }
         }
 

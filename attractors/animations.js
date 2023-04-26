@@ -356,6 +356,8 @@ class DuelingAttractorsAnimation
         {
             var p1 = m1.step(dt);
             var p2 = m2.step(dt);
+            if( beta == 1.0 )
+                return [p1, p2];
             var p1_1 = [];
             for( let i = 0; i < p1.length; i++ )
             {
