@@ -20,19 +20,22 @@
             {
                 const n = Attractors.all.length;
                 const i1 = Math.floor(Math.random() * n);
-                const i2 = Math.random() < 0.5 ? Math.floor(Math.random() * n) : i1;
-                const att1 = Attractors.all[i1];
-                const att2 = Attractors.all[i2];
+                var i2;
                 var options;
-                if( i1 == i2 && Math.random() < 0.5 )
+                if( Math.random() < 0.7 )
+                {
+                    i2 = i1;
                     options = {
                         dt: 0.01,
-                        beta: 0.03,
+                        beta: 0.05,
                         blur: 0.001,
             			kick: 0.01,
                         mix: 0.03
                     };
-                else
+                }
+                else if( Math.random() < 0.7 )
+                {
+                    i2 = i1;
                     options = {
                         dt: 0.01,
                         beta: 1.0,
@@ -40,6 +43,20 @@
             			kick: 0.01,
                         mix: 0.61803
                     };
+                }
+                else
+                {
+                    i2 = (i1 + Math.floor(Math.random() * n)) % n;
+                    options = {
+                        dt: 0.01,
+                        beta: 1.0,
+                        blur: 0.001,
+            			kick: 0.01,
+                        mix: 0.61803
+                    };
+                }
+                const att1 = Attractors.all[i1];
+                const att2 = Attractors.all[i2];
                 super(20000, canvas_element, [att1, att2], options);
             }
         }
