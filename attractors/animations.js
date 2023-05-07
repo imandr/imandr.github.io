@@ -419,7 +419,7 @@ class DuelingAttractorsAnimation
 		
         const sb = this.beta_share()
         const beta = sb.beta
-        const share = sb.share;
+        var share = sb.share;
     
         const dt1 = this.D1.LyapunovLog < -0.1 ? this.DT * 5 : this.DT;
         const dt2 = this.D2.LyapunovLog < -0.1 ? this.DT * 5 : this.DT;
@@ -440,6 +440,7 @@ class DuelingAttractorsAnimation
         var points1 = this.D1.step(p1);
         var points2 = this.D2.step(p2);
         this.C.clear(this.ClearColor, 0.15);
+        share = 0.3;
         var s1 = share;
         var s2 = 1-share;
         if( s1 > s2 )
