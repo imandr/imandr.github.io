@@ -359,54 +359,15 @@ class HyperAttractor extends BaseAttractor
             const P = params[3];
             const Q = params[4];
             const R = params[5];
-            const x1 = G(A*x) + B*F(C*y);
-            const y1 = G(P*y) + Q*F(R*x);
+            const x1 = H(A*x) + B*F(C*y);
+            const y1 = H(P*y) + Q*F(R*x);
             return [x1, y1];
         }
         super(np, 
             [-P, 0.3, 0.3, -P, 0.3, 0.7], 
             [P, P, P, P, P, P],
             [-R, -R], 
-            [R, R], options, Z, [G,F]);
-    }
-};
-
-class IkedaAttractor extends BaseAttractor
-{
-    constructor(np, options)
-    {
-        const P = 3.0;
-        const R = 5.0;
-        
-        function Z(x, y, p)
-        {
-            const Ai = p[0];
-            const Ar = p[1];
-            const B = p[2];
-            const K = p[3];
-            const P = p[4];
-            const phi = Math.atan2(y, x);
-            const r2 = x*x + y*y;
-            const r = Math.sqrt(r2);
-            const phi1 = phi + K - P/(1+r2);
-            const r1 = r*B;
-            const x1 = Ar + r1*Math.cos(phi1);
-            const y1 = Ai + r1*Math.sin(phi1);
-            return [x1, y1];
-        }
-        
-        super(np, 
-            [-1.5, -1.5, 0.7, 0.1, 5], 
-            [1.5, 1.5,   1.0, 1.0, 8],
-            [-R, -R], 
-            [R, R], options, Z);
-        
-        this.random_point = function()
-            {
-    			const a = Math.random() * Math.random() * Math.random() * 2.0 * 3.1415;
-    			return [Math.sin(a), Math.cos(a)];
-            }
-
+            [R, R], options, Z, [G,F,H]);
     }
 };
 
