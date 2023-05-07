@@ -428,7 +428,7 @@ class DuelingAttractorsAnimation
         var p2 = this.M2.step(dt2);
         
         if( beta != 1.0 && p1.length == p2.length )
-            for( i = 0; i < p1.length; i++ )
+            for( let i = 0; i < p1.length; i++ )
                 p2[i] = p1[i] + beta * (p2[i] - p1[i])
     
         //share = share*share;
