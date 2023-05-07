@@ -14,9 +14,12 @@ class BaseAttractor
         if( xmin.length != xmax.length )
             throw new Error("Dimensions of xmin and xmax differ");
         
-        this.LyapunovDistance = Math.min(Math.abs(xmin[0]-xmax[0]), Math.abs(xmin[1]-xmax[1]))/1000.0;
-        this.NLyapunov = 200;
-
+        this.LyapunovDelta = Math.min(Math.abs(xmin[0]-xmax[0]), Math.abs(xmin[1]-xmax[1]))/1000.0;
+        this.LyapunovPoints = 200;
+        this.LyapunovInterval = 10;
+        this.LyapunovNextUpdate = 0;
+        this.LyapunovLog = 0.0;
+        
         this.XDim = xmin.length;
         this.NP = np;
         if( options == null )
@@ -105,7 +108,7 @@ class BaseAttractor
                     return 1.0;
                 return Math.log(d2/d1)/2;
             },
-            { output: [this.NLyapunov] }
+            { output: [this.LyapunovPoints] }
         );
 
         this.random_point = this.random_point_uniform;
@@ -134,17 +137,21 @@ class BaseAttractor
                     //r = this.F(r[0], r[1], params);
                     this.Points[i] = this.F(r[0], r[1], params);
                 }
-        const t0 = Date.now();
-        var points1 = this.transform(this.Points, params, this.Pull, this.Blur);
-        const dt = Date.now() - t0;
-        this.Points = points1;
+        this.Points = this.transform(this.Points, params, this.Pull, this.Blur);
+        
+        if( --this.LyapunovNextUpdate <= 0 )
+        {
+            this.LyapunovLog = this.lyapunov(params);
+            this.LyapunovNextUpdate = this.LyapunovInterval;
+        }
+        
         return this.Points;
     }
 
     lyapunov_gpu(params, d)
     {
         if( d == null )     d = this.LyapunovDistance;
-        const np = this.NLyapunov;
+        const np = this.LyapunovPoints;
         var points = [];
         for( let i = 0; i < np; i++ )
         {
@@ -160,8 +167,8 @@ class BaseAttractor
     
     lyapunov(params, d)
     {
-        if( d == null )     d = this.LyapunovDistance;
-        const np = this.NLyapunov;
+        if( d == null )     d = this.LyapunovDelta;
+        const np = this.LyapunovPoints;
         var sumlog = 0.0;
         for( let i = 0; i < np; i++ )
         {
@@ -360,7 +367,7 @@ class HyperAttractor extends BaseAttractor
             const Q = params[4];
             const R = params[5];
             const x1 = H(A*x) + B*F(C*y);
-            const y1 = H(P*y) + Q*F(R*x);
+            const y1 = G(P*y) + Q*F(R*x);
             return [x1, y1];
         }
         super(np, 

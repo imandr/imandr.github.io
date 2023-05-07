@@ -5,6 +5,7 @@ class SingleAttractorAnimation
         if( options == null )
             options = {};
         this.NP = np;
+        this.StepCallback = options.step_callback;
         this.D = new attractor_class(this.NP, options);
         this.DT = options.dt == null ? 0.03 : options.dt;
         this.margin = 0;
@@ -21,7 +22,7 @@ class SingleAttractorAnimation
         this.C.clear(this.ClearColor, 1.0);
         this.PMorpher = new Drifter(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
-        const Skip = 10;
+        const Skip = 100;
         this.Colors = new ColorChanger();
         var params = this.PMorpher.step(this.DT);
         for( var t = 0; t < Skip; t++ )
@@ -30,7 +31,6 @@ class SingleAttractorAnimation
         this.Animating = false;
         this.L = null;
         this.T = 0;
-        this.stepCallback = options.step_callback;
     }
 
     resize()
@@ -43,17 +43,12 @@ class SingleAttractorAnimation
     step()
     {
         const c = this.Colors.next_color();
-        const params = this.PMorpher.step(this.DT);
+        const dt = this.D.LyapunovLog < 0.0 ? this.DT * 5 : this.DT;
+        const params = this.PMorpher.step(dt);
         const points = this.D.step(params);
         this.C.clear(this.ClearColor, 0.15);
         this.C.points(points, c, 0.15);
         this.C.render();
-        if( (++this.T) % 10 == 0 )
-        {
-            this.L = this.D.lyapunov(params);
-            if( this.stepCallback != null )
-                this.stepCallback(this);
-        }
     }
     
     animate_one_frame__()
@@ -85,6 +80,8 @@ class SingleAttractorAnimation
                 this
             );
         this.step();
+        if( this.StepCallback != null )
+            this.StepCallback(this);
     }
 
     start()
@@ -101,6 +98,11 @@ class SingleAttractorAnimation
     stop()
     {
         this.Animating = false;
+    }
+    
+    min_lyapunov_log()
+    {
+        return this.D.LyapunovLog;
     }
 }
 
@@ -127,7 +129,7 @@ class ColoredAttractorAnimation
         this.C.clear(this.ClearColor, 1.0);
         this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
-        const Skip = 10;
+        const Skip = 100;
         this.Colors = new ColorChanger();
         var params = this.PMorpher.step(this.DT);
         for( var t = 0; t < Skip; t++ )
@@ -224,7 +226,7 @@ class HSBAttractorAnimation
         this.C.clear(this.ClearColor, 1.0);
         this.PMorpher = new Morpher(this.D.PMin, this.D.PMax);
         //var D = new DeJong(0,0,0,0);
-        const Skip = 10;
+        const Skip = 100;
         this.HSB = new HSBMorpher();
         var params = this.PMorpher.step(this.DT);
         for( var t = 0; t < Skip; t++ )
@@ -282,6 +284,8 @@ class HSBAttractorAnimation
                 this
             );
         this.step();
+        if( this.StepCallback != null )
+            this.StepCallback(this);
     }
 
     start()
@@ -309,6 +313,7 @@ class DuelingAttractorsAnimation
             options = {};
         const options1 = Object.assign({}, options, options.attractors == null || options.attractors[0] == null ? {} : options.attractors[0]);
         const options2 = Object.assign({}, options, options.attractors == null || options.attractors[1] == null ? {} : options.attractors[1]);
+        this.StepCallback = options.step_callback;
         this.NP = 40000;
         if( Array.isArray(attractor_class) )
         {
@@ -387,7 +392,7 @@ class DuelingAttractorsAnimation
         const p12 = this.params12(this.DT, this.M1, this.M2, beta);
         const p1 = p12[0], p2 = p12[1];
 
-        const Skip = 30;
+        const Skip = 100;
         for( var t = 0; t < Skip; t++ )
         {
             this.D1.step(p1);
@@ -416,10 +421,16 @@ class DuelingAttractorsAnimation
         const beta = sb.beta
         const share = sb.share;
     
-        const p12 = this.params12(this.DT, this.M1, this.M2, beta);
-        const p1 = p12[0];
-        const p2 = p12[1];
-
+        const dt1 = this.D1.LyapunovLog < -0.1 ? this.DT * 5 : this.DT;
+        const dt2 = this.D2.LyapunovLog < -0.1 ? this.DT * 5 : this.DT;
+    
+        var p1 = this.M1.step(dt1);
+        var p2 = this.M2.step(dt2);
+        
+        if( beta != 1.0 && p1.length == p2.length )
+            for( i = 0; i < p1.length; i++ )
+                p2[i] = p1[i] + beta * (p2[i] - p1[i])
+    
         //share = share*share;
     
         var points1 = this.D1.step(p1);
@@ -480,6 +491,8 @@ class DuelingAttractorsAnimation
                 this.FrameInterval, this
             );
         this.step();
+        if( this.StepCallback != null )
+            this.StepCallback(this);
     }
 
     start()
@@ -499,5 +512,12 @@ class DuelingAttractorsAnimation
         const h = window.innerHeight;
         this.C.resize(w-this.margin*2, h-this.margin*2);
     };   
+
+    min_lyapunov_log()
+    {
+        const l1 = this.D1.LyapunovLog;
+        const l2 = this.D2.LyapunovLog;
+        return l1 < l2 ? l1 : l2;
+    }
 }
 
