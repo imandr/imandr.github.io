@@ -445,8 +445,8 @@ class MandelbrotAttractor extends BaseAttractor
 			const r = r_/Math.cosh(r_*0.5);
             const x1 = r * Math.cos(phi);
             const y1 = r * Math.sin(phi);
-			const x2 = x_/r_*r;
-			const y2 = y_/r_*r;
+			//const x2 = x_/r_*r;
+			//const y2 = y_/r_*r;
             return [x1, y1];
         }
         
