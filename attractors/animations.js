@@ -400,6 +400,11 @@ class DuelingAttractorsAnimation
         }
     }
     
+    attractor_names()
+    {
+        return [this.D1.Name, this.D2.Name];
+    }
+    
     step()
     {
         var hsb1 = this.Colors1.next_hsb();
@@ -421,8 +426,8 @@ class DuelingAttractorsAnimation
         const beta = sb.beta
         var share = sb.share;
     
-        const dt1 = this.D1.LyapunovLog < -0.1 ? this.DT * 5 : this.DT;
-        const dt2 = this.D2.LyapunovLog < -0.1 ? this.DT * 5 : this.DT;
+        const dt1 = this.D1.LyapunovLog < -0 ? this.DT * 5 : this.DT;
+        const dt2 = this.D2.LyapunovLog < -0 ? this.DT * 5 : this.DT;
     
         var p1 = this.M1.step(dt1);
         var p2 = this.M2.step(dt2);
@@ -440,22 +445,22 @@ class DuelingAttractorsAnimation
         var points1 = this.D1.step(p1);
         var points2 = this.D2.step(p2);
         this.C.clear(this.ClearColor, 0.15);
-        share = 0.3;
+        share = 0.4;
         var s1 = share;
         var s2 = 1-share;
         if( s1 > s2 )
         {
-            s2 = s2/s1 * 0.1;
-            s1 = 0.1;
+            s2 = s2/s1;
+            s1 = 1;
         }
         else
         {
-            s1 = s1/s2 * 0.1;
-            s2 = 0.1;
+            s1 = s1/s2;
+            s2 = 1;
         }
-        this.C.points(points1, c1, s1);
-        this.C.points(points2, c2, s2);
 
+        this.C.points(points1, c1, s1*0.15);
+        this.C.points(points2, c2, s2*0.15);
         // mix points
         if( this.Mix > 0 )
             for( let i = 0; i < points1.length; i++ )

@@ -5,6 +5,7 @@ class BaseAttractor
         this.Rate = 0.02;
         this.PMin = pmin;
         this.PMax = pmax;
+        this.Name = "unnamed";
         if( pmin.length != pmax.length )
             throw new Error("Dimensions of pmin and pmax differ");
         this.PDim = pmin.length;
@@ -211,6 +212,7 @@ class DeJongAttractor extends BaseAttractor
         const R = 2.5;
         super(np, [-P, -P, -P, -P], [P, P, P, P],
             [-R, -R], [R, R], options, Z);
+        this.Name = "DeJong";
     }
 };
 
@@ -253,10 +255,11 @@ class CubicAttractor extends BaseAttractor
             [-R, -R], 
             [R, R], options, Z, [F,H]
         );
+        this.Name = "Cubic";
     };
 }
 
-class TanhAttractor extends BaseAttractor
+class TanhOldAttractor extends BaseAttractor
 {
     constructor(np, options)
     {
@@ -292,6 +295,47 @@ class TanhAttractor extends BaseAttractor
             [-R, -R], 
             [R, R], options, Z, [H,G]
         );
+        this.Name = "Tanh";
+    }
+};
+
+class TanhAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        const P = 1.2;
+        const R = 3.0;
+
+        function G(x, y)
+        {
+            return Math.tanh(2*x*x-1);
+        }
+
+        function H(x, y)
+        {
+            return Math.tanh(x*x*x - 1.5*y + 0.5*x*y);
+        }
+
+        function Z(x, y, params)
+        {
+            const A = params[0];
+            const B = params[1];
+            const C = params[2];
+            const D = params[3];
+            const E = params[4];
+            const F = params[5];
+            const x1 = A*H(x, y) + B*G(y, x); //+ E*G(x); // + E*F(y);
+            const y1 = C*H(y, x) + D*G(x, y); //+ F*G(y); 
+            return [x1, y1];
+        }
+
+        super(np, 
+            [-P, -P, -P, -P], 
+            [P, P, P, P],
+            [-R, -R], 
+            [R, R], options, Z, [H,G]
+        );
+        this.Name = "Tanh";
     }
 };
 
@@ -332,7 +376,9 @@ class QExpAttractor extends BaseAttractor
             [-P, -P, 0.2, 0.2], 
             [P, P, P, P],
             [-R, -R], 
-            [R, R], options, Z, [F, H]);
+            [R, R], options, Z, [F, H]
+        );
+        this.Name = "QExp";
     }
 };
 
@@ -374,7 +420,9 @@ class HyperAttractor extends BaseAttractor
             [-P, 0.3, 0.3, -P, 0.3, 0.7], 
             [P, P, P, P, P, P],
             [-R, -R], 
-            [R, R], options, Z, [G,F,H]);
+            [R, R], options, Z, [G,F,H]
+        );
+        this.Name = "Hyper";
     }
 };
 
@@ -424,8 +472,9 @@ class MandelbrotAttractor extends BaseAttractor
             [0.1, 0.1, -0.1, 2], 
             [1.5, 1.5, 0.1, 2],
             [-1, -1], 
-            [1, 1], options, Z, [at2]);
-            
+            [1, 1], options, Z, [at2]
+        );
+
         this.random_point = function()
         {
             var point = this.random_point_uniform();
@@ -440,6 +489,7 @@ class MandelbrotAttractor extends BaseAttractor
 			return [Math.sin(a), Math.cos(a)];
         }
 
+        this.Name = "Twist";
     }
 };
 

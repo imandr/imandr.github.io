@@ -8,9 +8,24 @@
     <script src="attractors.js"></script>
     <script src="animations.js"></script>
     
+    <style type="text/css">
+        div.title {
+            display: block;
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: "Sofia", sans-serif;
+            font-size: 14pt;
+        }
+    </style>
 </head>
 
 <body class="noscroll">
+    
+    <div class="title" id="title"></div>
     
     <canvas id="canvas"></canvas>
     <script>
@@ -22,7 +37,8 @@
                 const i1 = Math.floor(Math.random() * n);
                 var i2;
                 var options;
-                if( Math.random() < 0.7 )
+                var r = Math.random();
+                if( r < 0.7 )
                 {
                     i2 = i1;
                     options = {
@@ -33,7 +49,7 @@
                         mix: 0.03
                     };
                 }
-                else if( Math.random() < 0.7 )
+                else if( r < 0.8 )
                 {
                     i2 = i1;
                     options = {
@@ -46,7 +62,7 @@
                 }
                 else
                 {
-                    i2 = (i1 + Math.floor(Math.random() * n)) % n;
+                    i2 = (i1 + Math.floor(Math.random() * (n-1))) % n;
                     options = {
                         dt: 0.01,
                         beta: 1.0,
@@ -69,6 +85,32 @@
         };
         let q = new Dueling(document.getElementById("canvas"), options);
         q.start();
+        const title = document.getElementById("title");
+        var opacity = 1.0;
+        const names = q.attractor_names();
+        var display = "Attractors: ";
+        for( name of names )
+        {
+            display += name + " ";
+        }
+        title.innerHTML = display;
+        title.style.opacity = opacity;
+        setTimeout(
+            function(){
+                function reduce_opacity()
+                {
+                    if( opacity > 0 )
+                    {
+                        opacity -= 0.01;
+                        opacity = opacity < 0 ? 0 : opacity;
+                        title.style.opacity = opacity;
+                        setTimeout(reduce_opacity, 100);
+                    }
+                }
+                reduce_opacity();
+            },
+            1000
+        )
     </script>
 </body>
 </html>
