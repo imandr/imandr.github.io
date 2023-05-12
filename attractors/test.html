@@ -34,7 +34,7 @@
             constructor(canvas_element, options)
             {
                 options.step_callback = step_callback;
-                super(30000, canvas_element, Attractors.Tanh1Attractor, options);
+                super(30000, canvas_element, Attractors.TanhAttractor, options);
             }
         }
         class Dual extends DuelingAttractorsAnimation
