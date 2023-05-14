@@ -493,7 +493,82 @@ class MandelbrotAttractor extends BaseAttractor
     }
 };
 
+class TwisterAttractor extends BaseAttractor
+{
+    constructor(np, options)
+    {
+        function at2(y, x)
+        {
+            const pi = 3.141592653589793;
+            if( x == 0 && y == 0 )
+                return 0.0;
+            else if( x == 0 )
+                return y > 0 ? pi/2 : pi*3/2;
+            else
+            {
+                const a = Math.atan(y/x);
+                return x < 0 ? a + pi : a;
+            }
+        }
+
+        function Z(x, y, params)
+        {
+            const a = params[0];
+            const b = params[1];
+            const rot = params[2];
+            const p = params[3];
+
+            x += a;
+            y += b;
+            var phi = at2(y, x);
+            var r = Math.sqrt(x*x + y*y);
+            
+            phi *= p;
+            r = Math.pow(r, p);
+            const r1 = r + 0.001;
+            
+            phi += rot*(5/r1 - 1);
+            r /= Math.cosh(r*0.5);
+            const x1 = r * Math.cos(phi);
+            const y1 = r * Math.sin(phi);
+			//const x2 = x_/r_*r;
+			//const y2 = y_/r_*r;
+            return [x1, y1];
+        }
+        
+        const P = 1.0;
+        const R = 3.5;
+        
+        super(np, 
+            //[0.3, 0.0], 
+            //[0.8, 0.5],
+            [-1.5, -1.5, -0.1, 1.5], 
+            [1.5, 1.5, 0.1, 3.0],
+            [-1, -1], 
+            [1, 1], options, Z, [at2]
+        );
+
+        this.random_point = function()
+        {
+            var point = this.random_point_uniform();
+            point[0] /= 2;
+            point[1] /= 2;
+            return point;
+        }
+		
+        this.random_point = function()
+        {
+			const a = Math.random() * Math.random() * Math.random() * 2.0 * 3.1415;
+			return [Math.sin(a), Math.cos(a)];
+        }
+
+        this.Name = "Twister";
+    }
+};
+
+
+
 var Attractors = {
-    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongAttractor, MandelbrotAttractor,
-    all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, MandelbrotAttractor]
+    DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongAttractor, TwisterAttractor,
+    all: [DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, TwisterAttractor]
 }

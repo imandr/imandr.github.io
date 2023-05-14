@@ -34,7 +34,7 @@
             constructor(canvas_element, options)
             {
                 options.step_callback = step_callback;
-                super(30000, canvas_element, Attractors.MandelbrotAttractor, options);
+                super(30000, canvas_element, Attractors.Mandelbrot2Attractor, options);
             }
         }
         class Dual extends DuelingAttractorsAnimation
@@ -46,7 +46,7 @@
         }
         const options = {
             beta: 1.0,
-            dt: 0.02,
+            dt: 0.01,
             mix: 0.61803,
             pull: 1.0,
             kick: 0.01,
