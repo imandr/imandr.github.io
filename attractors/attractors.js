@@ -29,7 +29,7 @@ class BaseAttractor
         this.Pull = options.pull == null ? 1.0 : options.pull;
         this.Blur = options.blur == null ? 0.0 : options.blur;
         this.Points = [];
-        this.GPU = new GPU();           //{mode:"cpu"});
+        this.GPU = create_GPU();           //{mode:"cpu"});
         //this.GPU = new GPU({mode:"dev"});
         this.transform_kernel = null;
         this.transform_with_pull_kernel = null;
@@ -469,7 +469,7 @@ class MandelbrotAttractor extends BaseAttractor
         super(np, 
             //[0.3, 0.0], 
             //[0.8, 0.5],
-            [0.1, 0.1, -0.1, 2], 
+            [-1.5, -1.5, -0.1, 2], 
             [1.5, 1.5, 0.1, 2],
             [-1, -1], 
             [1, 1], options, Z, [at2]

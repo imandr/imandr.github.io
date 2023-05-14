@@ -19520,3 +19520,17 @@ module.exports = {
 };
 },{"./input":110,"./texture":113,"acorn":1}]},{},[107])(107)
 });
+
+
+function create_GPU(options)
+{
+    var gpu = null;
+    try{
+        gpu = new GPU(options);
+    }
+    catch (error) {
+        gpu = new GPU.GPU(options);
+    }
+    return gpu;
+}
+

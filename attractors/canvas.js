@@ -1,7 +1,7 @@
 let RectMapper = class {
     constructor(x0, y0, x1, y1, w, h)
     {
-        const gpu = new GPU();
+        const gpu = create_GPU();
         this.CH = h/2;
         this.CW = w/2;
         this.Width = w;
@@ -139,7 +139,7 @@ class Canvas
 class RectMapper2 {
     constructor(x0, y0, x1, y1, w, h)
     {
-        const gpu = new GPU();
+        const gpu = create_GPU();
         this.CH = h/2;
         this.CW = w/2;
         this.Width = w;
