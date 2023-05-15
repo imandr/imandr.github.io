@@ -34,25 +34,25 @@
             constructor(canvas_element, options)
             {
                 options.step_callback = step_callback;
-                super(30000, canvas_element, Attractors.Mandelbrot2Attractor, options);
+                super(30000, canvas_element, Attractors.TwisterAttractor, options);
             }
         }
         class Dual extends DuelingAttractorsAnimation
         {
             constructor(canvas_element, options)
             {
-                super(15000, canvas_element, [Attractors.DeJongAttractor, Attractors.DeJongAttractor], options);
+                super(15000, canvas_element, [Attractors.TwisterAttractor, Attractors.CubicAttractor], options);
             }
         }
         const options = {
             beta: 1.0,
             dt: 0.01,
-            mix: 0.61803,
+            mix: 0.9,
             pull: 1.0,
             kick: 0.01,
             blur: 0.001
         }
-        let q = new Single(document.getElementById("canvas"), options);
+        let q = new Dual(document.getElementById("canvas"), options);
         q.start();
     </script>
 </body>

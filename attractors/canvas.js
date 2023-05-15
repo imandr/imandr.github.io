@@ -245,10 +245,9 @@ class Canvas2
         
             this.Ctx.putImageData(image, 0, 0);
             this.NextClean = this.CleanInterval;
-        
         }
-        
-        this.update = function(points)
+
+        this.__update = function(points)
         {
             var xmin = points[0][0],
                 ymin = points[0][1];
@@ -263,6 +262,67 @@ class Canvas2
                 if( y < ymin )  ymin = y;
                 else if( y > ymax ) ymax = y;
             }
+            const scale_x = this.DimX/(xmax-xmin+0.001);
+            const scale_y = this.DimY/(ymax-ymin+0.001);
+            const scale_target = (scale_x < scale_y ? scale_x : scale_y)/(1.0 + this.Margin);
+            const cx_target = (xmax+xmin)/2;
+            const cy_target = (ymax+ymin)/2;
+            if ( !this.FirstUpdate && this.Scale < scale_target )
+                beta = beta/2;
+            this.Scale += beta*(scale_target - this.Scale);
+            this.CX += beta*(cx_target - this.CX);
+            this.CY += beta*(cy_target - this.CY);
+            this.FirstUpdate = false;
+        }
+        
+        const gpu = create_GPU();
+        this.range_kernel = gpu.createKernel(
+            function(points, n, fragment)
+            {
+                const i0 = this.thread.x*fragment;
+                const i1 = i0 + fragment;
+                var xmax = points[i0][0];
+                var ymax = points[i0][1];
+                var xmin = xmax;
+                var ymin = ymax;
+                for( let i = i0+1; i < i1 && i < n; i++ )
+                {
+                    const x = points[i][0];
+                    const y = points[i][1];
+                    if( x > xmax )  xmax = x;
+                    if( x < xmin )  xmin = x;
+                    if( y > ymax )  ymax = y;
+                    if( y < ymin )  ymin = y;
+                }
+                return [xmin, xmax, ymin, ymax];
+            },
+            { dynamicOutput: true }
+        );
+
+        this.update = function(points)
+        {
+            const fragment = 100;
+            const nfragments = Math.ceil(points.length/fragment)
+            this.range_kernel.setOutput([nfragments]);
+            const fragment_ranges = this.range_kernel(points, points.length, fragment);
+            
+            var xmin = fragment_ranges[0][0],
+                xmax = fragment_ranges[0][1],
+                ymin = fragment_ranges[0][2],
+                ymax = fragment_ranges[0][3];
+
+            for( const range of fragment_ranges )
+            {
+                const   x0 = range[0],
+                        x1 = range[1],
+                        y0 = range[2],
+                        y1 = range[3];
+                if( x0 < xmin )  xmin = x0;
+                if( x1 > xmax )  xmax = x1;
+                if( y0 < ymin )  ymin = y0;
+                if( y1 > ymax )  ymax = y1;
+            }
+            var beta = this.FirstUpdate ? 1.0 : this.Beta;
             const scale_x = this.DimX/(xmax-xmin+0.001);
             const scale_y = this.DimY/(ymax-ymin+0.001);
             const scale_target = (scale_x < scale_y ? scale_x : scale_y)/(1.0 + this.Margin);

@@ -38,18 +38,18 @@
                 var i2;
                 var options;
                 var r = Math.random();
-                if( r < 0.7 )
+                if( r < 0.5 )
                 {
                     i2 = i1;
                     options = {
-                        dt: 0.01,
+                        dt: 0.02,
                         beta: 0.05,
                         blur: 0.001,
             			kick: 0.01,
                         mix: 0.03
                     };
                 }
-                else if( r < 0.8 )
+                else if( r < 0.6 )
                 {
                     i2 = i1;
                     options = {
@@ -57,7 +57,7 @@
                         beta: 1.0,
                         blur: 0.001,
             			kick: 0.01,
-                        mix: 0.61803
+                        mix: 0.68
                     };
                 }
                 else
@@ -68,7 +68,7 @@
                         beta: 1.0,
                         blur: 0.001,
             			kick: 0.01,
-                        mix: 0.61803
+                        mix: 0.9
                     };
                 }
                 const att1 = Attractors.all[i1];

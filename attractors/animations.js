@@ -444,7 +444,7 @@ class DuelingAttractorsAnimation
     
         var points1 = this.D1.step(p1);
         var points2 = this.D2.step(p2);
-        this.C.clear(this.ClearColor, 0.15);
+        this.C.clear(this.ClearColor, 0.2);
         share = 0.4;
         var s1 = share;
         var s2 = 1-share;
@@ -459,8 +459,8 @@ class DuelingAttractorsAnimation
             s2 = 1;
         }
 
-        this.C.points(points1, c1, s1*0.15);
-        this.C.points(points2, c2, s2*0.15);
+        this.C.points(points1, c1, s1*0.2);
+        this.C.points(points2, c2, s2*0.2);
         // mix points
         if( this.Mix > 0 )
             for( let i = 0; i < points1.length; i++ )
