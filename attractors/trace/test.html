@@ -1,0 +1,130 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="common.css">
+    <script src="gpu-browser.js"></script>
+    <script src="drift.js"></script>
+    <script src="canvas.js"></script>
+    <script src="attractors.js"></script>
+    <script src="trace.js"></script>
+    
+</head>
+
+<body class="noscroll">
+    
+    <canvas id="canvas"></canvas>
+    <div id="monitor" style="position:fixed; bottom:5px; right:5px; display:block; color: white; font: 10pt arial"></div>
+    <script>
+        
+        class TraceAnimation
+        {
+            constructor(np, canvas_element, attractor, options)
+            {
+                if( options == null )
+                    options = {};
+                this.NP = np;
+                this.D = attractor;
+                this.DT = options.dt == null ? 0.01 : options.dt;
+                this.DTParams = options.dt_params == null ? 0.001 : options.dt_params;
+                this.Trace = new Trace(this.NP, this.D, this.DT);
+                this.margin = 0;
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                const xmin = this.D.XMin;
+                const xmax = this.D.XMax;
+                this.C = new Canvas2(canvas_element, w, h, xmin[0], xmin[1], xmax[0], xmax[1],
+                        { pixel_size:3 });
+                this.ClearColor = [0,0,0];
+                const qexp = this;
+                window.onresize = function() {
+                    qexp.resize();
+                };
+                this.C.clear(this.ClearColor, 1.0);
+                this.PMorpher = new Drifter(this.D.PMin, this.D.PMax);
+                //var D = new DeJong(0,0,0,0);
+                const Skip = 100;
+                this.Colors = new ColorChanger();
+                var params = this.PMorpher.step(this.DT);
+                for( var t = 0; t < Skip; t++ )
+                    this.D.step(params);
+                this.FrameInterval = 1.0/20 * 1000; // frame interval in milliseconds
+                this.Animating = false;
+                this.L = null;
+                this.T = 0;
+            }
+
+            resize()
+            {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                this.C.resize(w-this.margin*2, h-this.margin*2);
+            };
+
+            step()
+            {
+                const c = this.Colors.next_color();
+                const params = this.PMorpher.step(this.DTParams);
+                const points = this.Trace.step(params);
+                this.C.clear(this.ClearColor, 0.02);
+                this.C.points(points, c, 0.5);
+                this.C.render();
+            }
+    
+            animate_one_frame()
+            {
+                if( this.Animating )
+                    setTimeout(
+                        function (animation) {
+                            window.requestAnimationFrame(function() 
+                                {
+                                    animation.animate_one_frame()
+                                }
+                            )
+                        },
+                        this.FrameInterval, 
+                        this
+                    );
+                this.step();
+                if( this.StepCallback != null )
+                    this.StepCallback(this);
+            }
+
+            start()
+            {
+                this.Animating = true;
+                const qexp = this;
+                window.requestAnimationFrame(function() 
+                    {
+                        qexp.animate_one_frame()
+                    }
+                );
+            }
+    
+            stop()
+            {
+                this.Animating = false;
+            }
+    
+            min_lyapunov_log()
+            {
+                return this.D.LyapunovLog;
+            }
+        }
+        
+        const options = {
+            beta: 1.0,
+            dt: 0.01,
+            dt_params: 0.001,
+            mix: 0.9,
+            pull: 1.0,
+            kick: 0.01,
+            blur: 0.001
+        }
+
+        const NP = 1000, DT = 0.1;
+        const att = new Attractors.DeJongAttractor(NP, options);
+        const animation = new TraceAnimation(NP, document.getElementById("canvas"), att, options)
+        animation.start();
+    </script>
+</body>
+</html>

@@ -315,10 +315,17 @@ class DuelingAttractorsAnimation
         const options2 = Object.assign({}, options, options.attractors == null || options.attractors[1] == null ? {} : options.attractors[1]);
         this.StepCallback = options.step_callback;
         this.NP = 40000;
+        this.Beta = options.beta;
+        var share_range = [0.4, 0.6];               // for homogenous mix
         if( Array.isArray(attractor_class) )
         {
             this.D1 = new attractor_class[0](this.NP, options1);
             this.D2 = new attractor_class[1](this.NP, options2);
+            if( attractor_class[1] !== attractor_class[0] )
+            {
+                share_range = [0.3, 0.7];
+                this.Beta = this.Beta != null ? this.Beta : 1.0;
+            }
         }
         else
         {
@@ -327,11 +334,10 @@ class DuelingAttractorsAnimation
         }
         this.M1 = new Morpher(this.D1.PMin, this.D1.PMax);
         this.M2 = new Morpher(this.D2.PMin, this.D2.PMax);
-        this.SBM = new Morpher([0.2, 0.05], [0.8, 0.2]);
+        this.SBM = new Morpher([share_range[0], 0.3], [share_range[1], 0.5]);
         this.DT = options.dt == null ? 0.03 : options.dt;
         this.Mix = options.mix == null ? 0.01 : options.mix;
         this.Share = options.share;
-        this.Beta = options.beta;
         this.FrameInterval = 1.0/15 * 1000; // frame interval in milliseconds
 
         this.margin = 0;
@@ -361,6 +367,7 @@ class DuelingAttractorsAnimation
         {
             var p1 = m1.step(dt);
             var p2 = m2.step(dt);
+            beta = beta * beta;
             if( beta == 1.0 )
                 return [p1, p2];
             var p1_1 = [];
@@ -374,7 +381,17 @@ class DuelingAttractorsAnimation
         this.beta_share = function()
         {
             const sb = this.SBM.step(0.03);
-            const share = this.Share == null ? sb[0] : this.Share;
+            var share;
+            if( this.Share == null )
+            {
+                share = sb[0];
+                if( share < 0.5 )
+                    share = share * share;
+                else
+                    share = 1.0 - (1-share)*(1-share);
+            }
+            else
+                share = this.Share;
             const beta = this.Beta == null ? sb[1] : this.Beta;
             return {
                 share: share,
@@ -392,7 +409,7 @@ class DuelingAttractorsAnimation
         const p12 = this.params12(this.DT, this.M1, this.M2, beta);
         const p1 = p12[0], p2 = p12[1];
 
-        const Skip = 100;
+        const Skip = 200;
         for( var t = 0; t < Skip; t++ )
         {
             this.D1.step(p1);
@@ -424,7 +441,7 @@ class DuelingAttractorsAnimation
 		
         const sb = this.beta_share()
         const beta = sb.beta
-        var share = sb.share;
+        var share = this.Share == null ? sb.share : this.Share;
     
         const dt1 = this.D1.LyapunovLog < -0 ? this.DT * 5 : this.DT;
         const dt2 = this.D2.LyapunovLog < -0 ? this.DT * 5 : this.DT;
@@ -445,7 +462,7 @@ class DuelingAttractorsAnimation
         var points1 = this.D1.step(p1);
         var points2 = this.D2.step(p2);
         this.C.clear(this.ClearColor, 0.2);
-        share = 0.4;
+        //share = 0.4;
         var s1 = share;
         var s2 = 1-share;
         if( s1 > s2 )

@@ -193,7 +193,7 @@ class Canvas2
         this.Ctx.fillRect(0, 0, this.DimX, this.DimY);
     }
     
-    constructor(canvas_element, dimx, dimy, x0, y0, x1, y1)
+    constructor(canvas_element, dimx, dimy, x0, y0, x1, y1, options)
     {
         this.C = canvas_element;
         this.C.setAttribute("width", dimx);
@@ -208,11 +208,12 @@ class Canvas2
         this.CX = (x0 + y1)/2;
         this.CY = (y0 + x1)/2;
         this.CleanInterval = 100;
-        this.Beta = 0.01;
+        this.Beta = 0.1;
         this.FirstUpdate = true;
         this.Margin = 0.38;
         this.DimX = dimx;
         this.DimY = dimy;
+        this.PixelSize = (options == null || options.pixel_size == null ) ? 1.0 : options.pixel_size;
 
         const scale_x = dimx/(x1-x0);
         const scale_y = dimy/(y1-y0);
@@ -311,6 +312,10 @@ class Canvas2
                 ymin = fragment_ranges[0][2],
                 ymax = fragment_ranges[0][3];
 
+            var xsum = 0,
+                ysum = 0,
+                nranges = 0;
+
             for( const range of fragment_ranges )
             {
                 const   x0 = range[0],
@@ -321,18 +326,21 @@ class Canvas2
                 if( x1 > xmax )  xmax = x1;
                 if( y0 < ymin )  ymin = y0;
                 if( y1 > ymax )  ymax = y1;
+                xsum += (x0 + x1)/2;
+                ysum += (y0 + y1)/2;
+                nranges += 1;
             }
             var beta = this.FirstUpdate ? 1.0 : this.Beta;
             const scale_x = this.DimX/(xmax-xmin+0.001);
             const scale_y = this.DimY/(ymax-ymin+0.001);
             const scale_target = (scale_x < scale_y ? scale_x : scale_y)/(1.0 + this.Margin);
-            const cx_target = (xmax+xmin)/2;
-            const cy_target = (ymax+ymin)/2;
+            const cx_target = xsum/nranges; //(xmax+xmin)/2;
+            const cy_target = ysum/nranges; //(ymax+ymin)/2;
             if ( !this.FirstUpdate && this.Scale < scale_target )
-                beta = beta/2;
+                beta = beta/5;
             this.Scale += beta*(scale_target - this.Scale);
-            this.CX += beta*(cx_target - this.CX);
-            this.CY += beta*(cy_target - this.CY);
+            this.CX += beta/5*(cx_target - this.CX);
+            this.CY += beta/5*(cy_target - this.CY);
             this.FirstUpdate = false;
         }
     }
@@ -382,10 +390,11 @@ class Canvas2
             }
             const ix = Math.floor(p[0]);
             const iy = Math.floor(p[1]);
-            if( Math.random() < 0.5 )
-                this.Ctx.fillRect(ix-1, iy, 1.7, 0.7);
+            const size = this.PixelSize;
+            if( Math.random() < 0 )
+                this.Ctx.fillRect(ix-size/2, iy, size, size);
             else
-                this.Ctx.fillRect(ix, iy-1, 0.7, 1.7);
+                this.Ctx.fillRect(ix, iy-size/2, size, size);
         }
 
         if( --this.NextClean <= 0 )
