@@ -386,9 +386,9 @@ class DuelingAttractorsAnimation
             {
                 share = sb[0];
                 if( share < 0.5 )
-                    share = share * share;
+                    share = share * share * 2;
                 else
-                    share = 1.0 - (1-share)*(1-share);
+                    share = 1.0 - (1-share)*(1-share)*2;
             }
             else
                 share = this.Share;
