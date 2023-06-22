@@ -42,16 +42,6 @@ class BaseAttractor
                 - 6.0;
         }
 
-        this.transform = function(points, params, pull, blur)
-        {
-            if( this.transform_with_pull_kernel != null )
-                return this.transform_with_pull_kernel(points, params, pull, blur);
-            var points1 = this.transform_kernel(points, params);
-            if( pull != 1.0 || blur != 0.0 )
-                points1 = this.pull_kernel(points, points1, pull, blur);
-            return points1;
-        }
-
         this.random_point_uniform = function()
         {
             var p = new Float32Array(this.XDim);
@@ -128,6 +118,20 @@ class BaseAttractor
         this.Points = points;
     }
     
+    transform(points, params, pull, blur)
+    {   // assume length of points = length of this.Points
+        if( this.transform_with_pull_kernel != null )
+            return this.transform_with_pull_kernel(points, params, pull, blur);
+        var points1 = this.transform_kernel(points, params);
+        if( pull == null )
+            pull = 1.0;
+        if( blur == null )
+            blur = 0.0;
+        if( pull != 1.0 || blur != 0.0 )
+            points1 = this.pull_kernel(points, points1, pull, blur);
+        return points1;
+    }
+
     step(params)
     {
         if(this.Kick > 0.0)
@@ -138,6 +142,7 @@ class BaseAttractor
                     //r = this.F(r[0], r[1], params);
                     this.Points[i] = this.F(r[0], r[1], params);
                 }
+
         this.Points = this.transform(this.Points, params, this.Pull, this.Blur);
         
         if( --this.LyapunovNextUpdate <= 0 )
