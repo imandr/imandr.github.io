@@ -2,7 +2,6 @@ class BaseAttractor
 {
     constructor(np, pmin, pmax, xmin, xmax, options, F, functions)
     {
-        this.Rate = 0.02;
         this.PMin = pmin;
         this.PMax = pmax;
         this.Name = "unnamed";
@@ -50,36 +49,38 @@ class BaseAttractor
             return p;
         }
 
-        if( functions != null )
-            for( let f of functions )
-                this.GPU.addFunction(f);
-        this.GPU.addFunction(F);
-        //this.GPU.addFunction(normal);
-        this.F = F;
-
-        this.transform_with_pull_kernel = this.GPU.createKernel(
-            function(points, params, pull, blur)
-            {
-                const xy1 = Z(points[this.thread.x][0], points[this.thread.x][1], params);
-                
-                if( pull == 1 && blur == 0 )
-                    return xy1;
-                else
-                {
-                    const x = points[this.thread.x][0];
-                    const y = points[this.thread.x][1];
-                    const x1 = xy1[0], y1 = xy1[1];
-                    //const r = Math.pow(Math.random(), 3.0);
-                    const r = Math.random() + Math.random() + Math.random() + Math.random()
-                            + Math.random() + Math.random() + Math.random() + Math.random()
-                            + Math.random() + Math.random() + Math.random() + Math.random()
-                            - 6.0;
-                    const t = pull * (1.0 - r*blur);
-                    return [x + (x1-x)*t, y + (y1-y)*t];
-                }
-            },
-            { output: [this.NP] }
-        );
+		if( F != null )
+		{
+	        this.GPU.addFunction(F);
+	        if( functions != null )
+	            for( let f of functions )
+	                this.GPU.addFunction(f);
+	        //this.GPU.addFunction(normal);
+	        this.F = F;
+	        this.transform_with_pull_kernel = this.GPU.createKernel(
+	            function(points, params, pull, blur)
+	            {
+	                const xy1 = Z(points[this.thread.x][0], points[this.thread.x][1], params);
+            
+	                if( pull == 1 && blur == 0 )
+	                    return xy1;
+	                else
+	                {
+	                    const x = points[this.thread.x][0];
+	                    const y = points[this.thread.x][1];
+	                    const x1 = xy1[0], y1 = xy1[1];
+	                    //const r = Math.pow(Math.random(), 3.0);
+	                    const r = Math.random() + Math.random() + Math.random() + Math.random()
+	                            + Math.random() + Math.random() + Math.random() + Math.random()
+	                            + Math.random() + Math.random() + Math.random() + Math.random()
+	                            - 6.0;
+	                    const t = pull * (1.0 - r*blur);
+	                    return [x + (x1-x)*t, y + (y1-y)*t];
+	                }
+	            },
+	            { output: [this.NP] }
+	        );
+		}
 
         this.lyapunov_logs = this.GPU.createKernel(
             function(pairs, params)
@@ -571,7 +572,38 @@ class TwisterAttractor extends BaseAttractor
     }
 };
 
-
+class PairedAttractor extends BaseAttractor
+{
+	constructor(np, options)
+	{
+		const a1 = new options.class1(np, options);
+		const a2 = new options.class2(np, options);
+		const xmin = [Math.min(a1.XMin[0], a2.XMin[0]), Math.min(a1.XMin[1], a2.XMin[1])];
+		const xmax = [Math.max(a1.XMax[0], a2.XMax[0]), Math.max(a1.XMax[1], a2.XMax[1])];
+		
+        super(np, 
+            a1.PMin.concat(a2.PMin), 
+            a1.PMax.concat(a2.PMax),
+            xmin, xmax, 
+            options
+        );
+		this.F = function(x, y, params)
+		{
+			const p1 = a1.F(x, y, params.slice(0, this.NP1));
+			return a2.F(p1[0], p1[1], params.slice(this.NP1));
+		}
+		this.NP1 = a1.PMin.length;
+		this.NP2 = a2.PMin.length;
+		this.A1 = a1;
+		this.A2 = a2;
+	}
+	
+	transform(points, params, pull, blur)
+    {   // assume length of points = length of this.Points
+		const p1 = this.A1.transform(points, params.slice(0, this.NP1), pull, blur/2);
+		return this.A2.transform(p1, params.slice(this.NP1), pull, blur/2);
+    }
+}
 
 var Attractors = {
     DeJongAttractor, CubicAttractor, TanhAttractor, QExpAttractor, HyperAttractor, DeJongAttractor, TwisterAttractor,

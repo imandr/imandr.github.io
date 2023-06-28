@@ -37,6 +37,18 @@
                 super(30000, canvas_element, Attractors.TwisterAttractor, options);
             }
         }
+
+        class Paired extends SingleAttractorAnimation
+        {
+            constructor(canvas_element, options)
+            {
+                options.step_callback = step_callback;
+				options.class2 = Attractors.DeJongAttractor;
+				options.class1 = Attractors.DeJongAttractor;
+                super(30000, canvas_element, PairedAttractor, options);
+            }
+        }
+
         class Dual extends DuelingAttractorsAnimation
         {
             constructor(canvas_element, options)
@@ -44,10 +56,11 @@
                 super(15000, canvas_element, [Attractors.TwisterAttractor, Attractors.CubicAttractor], options);
             }
         }
+
         const options = {
             //beta: 1.0,
             dt: 0.01,
-            mix: 0.9,
+            mix: 0.999,
             pull: 1.0,
             kick: 0.01,
             blur: 0.001

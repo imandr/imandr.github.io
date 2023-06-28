@@ -45,17 +45,17 @@
                         dt: 0.01,
                         blur: 0.001,
             			kick: 0.01,
-                        mix: 0.03
+                        mix: 0.99
                     };
                 }
                 else
                 {
-                    i2 = (i1 + Math.floor(Math.random() * (n-1))) % n;
+                    i2 = (i1 + 1 + Math.floor(Math.random() * (n-2))) % n;
                     options = {
                         dt: 0.01,
                         blur: 0.001,
             			kick: 0.01,
-                        mix: 0.7
+                        mix: 0.99
                     };
                 }
                 const att1 = Attractors.all[i1];
