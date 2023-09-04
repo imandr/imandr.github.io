@@ -33,7 +33,13 @@
         {
             constructor(canvas_element, options)
             {
-                const n = Attractors.all.length;
+				const select_attractors = [
+					Attractors.DeJongAttractor,
+					Attractors.CubicAttractor,
+					Attractors.HyperAttractor,
+					Attractors.TwisterAttractor
+				];
+                const n = select_attractors.length;
                 const i1 = Math.floor(Math.random() * n);
                 var i2;
                 var options;
@@ -58,8 +64,8 @@
                         mix: 0.99
                     };
                 }
-                const att1 = Attractors.all[i1];
-                const att2 = Attractors.all[i2];
+                const att1 = select_attractors[i1];
+                const att2 = select_attractors[i2];
                 super(20000, canvas_element, [att1, att2], options);
             }
         }
